@@ -1,0 +1,10 @@
+# Only the Go sources matter to the image: the build compiles the committed
+# generated code and never runs the generator, which is what everything below
+# exists for.
+.git
+.github
+.tools
+node_modules
+build
+docs
+examples
