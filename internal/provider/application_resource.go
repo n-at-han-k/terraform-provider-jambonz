@@ -50,12 +50,20 @@ func (r *applicationResource) Configure(_ context.Context, req resource.Configur
 	if req.ProviderData == nil {
 		return
 	}
-	client, ok := req.ProviderData.(*jambonzapi.ClientWithResponses)
+	data, ok := req.ProviderData.(*providerData)
 	if !ok {
-		resp.Diagnostics.AddError("Unexpected provider data", "expected *jambonzapi.ClientWithResponses")
+		resp.Diagnostics.AddError("Unexpected provider data", "expected *providerData")
 		return
 	}
-	r.client = client
+	if data.API == nil {
+		resp.Diagnostics.AddError(
+			"Jambonz API client not configured",
+			"This resource is managed through the Jambonz REST API, which needs the provider's `endpoint` and `api_key`. "+
+				"Set them, or the JAMBONZ_ENDPOINT and JAMBONZ_API_KEY environment variables.",
+		)
+		return
+	}
+	r.client = data.API
 }
 
 func (r *applicationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

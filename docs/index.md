@@ -18,6 +18,12 @@ provider "jambonz" {
   # JAMBONZ_API_KEY.
   endpoint = "https://jambonz.cloud/api/v1"
   api_key  = var.jambonz_api_key
+
+  # Only jambonz_api_key uses this, and only because the REST API cannot create
+  # the key that would authenticate the call. May also come from the
+  # environment, as JAMBONZ_DATABASE_URL. A configuration that manages nothing
+  # but API keys can set this and leave the two above out.
+  database = "mysql://jambones:${var.db_password}@mysql:3306/jambones"
 }
 ```
 
@@ -27,4 +33,5 @@ provider "jambonz" {
 ### Optional
 
 - `api_key` (String, Sensitive) Jambonz API key. May also be provided via the JAMBONZ_API_KEY environment variable.
+- `database` (String, Sensitive) Connection string for the jambonz MySQL database, either as a go-sql-driver DSN ("user:pass@tcp(host:3306)/jambones") or a URL ("mysql://user:pass@host:3306/jambones"). Only `jambonz_api_key` uses it, and only because the REST API cannot create the key that would authenticate the call. May also be provided via the JAMBONZ_DATABASE_URL environment variable.
 - `endpoint` (String) Jambonz API endpoint, including the /v1 path. May also be provided via the JAMBONZ_ENDPOINT environment variable.

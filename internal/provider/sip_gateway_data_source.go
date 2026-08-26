@@ -43,12 +43,20 @@ func (d *sipGatewayDataSource) Configure(_ context.Context, req datasource.Confi
 	if req.ProviderData == nil {
 		return
 	}
-	client, ok := req.ProviderData.(*jambonzapi.ClientWithResponses)
+	data, ok := req.ProviderData.(*providerData)
 	if !ok {
-		resp.Diagnostics.AddError("Unexpected provider data", "expected *jambonzapi.ClientWithResponses")
+		resp.Diagnostics.AddError("Unexpected provider data", "expected *providerData")
 		return
 	}
-	d.client = client
+	if data.API == nil {
+		resp.Diagnostics.AddError(
+			"Jambonz API client not configured",
+			"This data source is managed through the Jambonz REST API, which needs the provider's `endpoint` and `api_key`. "+
+				"Set them, or the JAMBONZ_ENDPOINT and JAMBONZ_API_KEY environment variables.",
+		)
+		return
+	}
+	d.client = data.API
 }
 
 func (d *sipGatewayDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
