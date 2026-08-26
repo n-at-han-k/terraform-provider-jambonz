@@ -1,42 +1,49 @@
 # Visit https://golangci-lint.run/ for usage documentation
 # and information on other useful linters
-issues:
-  max-per-linter: 0
-  max-same-issues: 0
-  exclude-rules:
-    # internal/provider/convert.go is the conversion surface the generator emits
-    # calls into: codegen/tooling/cmd/gen/convert.go maps each attribute kind and
-    # each `format:` onto one of these helpers by name. Which of them today's
-    # codegen/openapi.yaml happens to reach is a property of the spec, not of this
-    # code -- a required boolean, an optional integer or a `format: date-time`
-    # anywhere in the spec brings another one into use.
-    #
-    # So "unused" here means "the current spec does not reach it", and deleting on
-    # that basis produces a generator that emits a call to a helper that no longer
-    # exists: a failure two stages from its cause, which is the thing this whole
-    # pipeline is arranged to avoid.
-    - path: internal/provider/convert\.go
-      linters:
-        - unused
+version: "2"
 
 linters:
-  disable-all: true
+  default: none
   enable:
+    - copyloopvar
     - durationcheck
     - errcheck
-    - copyloopvar
     - forcetypeassert
     - godot
-    - gofmt
-    - gosimple
+    - govet
     - ineffassign
     - makezero
     - misspell
     - nilerr
     - predeclared
     - staticcheck
-    - tenv
     - unconvert
     - unparam
     - unused
-    - govet
+    - usetesting
+  exclusions:
+    rules:
+      # internal/provider/convert.go is the conversion surface the generator emits
+      # calls into: codegen/tooling/cmd/gen/convert.go maps each attribute kind and
+      # each `format:` onto one of these helpers by name. Which of them today's
+      # codegen/openapi.yaml happens to reach is a property of the spec, not of this
+      # code -- a required boolean, an optional integer or a `format: date-time`
+      # anywhere in the spec brings another one into use.
+      #
+      # So "unused" here means "the current spec does not reach it", and deleting on
+      # that basis produces a generator that emits a call to a helper that no longer
+      # exists: a failure two stages from its cause, which is the thing this whole
+      # pipeline is arranged to avoid.
+      - path: internal/provider/convert\.go
+        linters:
+          - unused
+
+# gofmt is a formatter in golangci-lint v2, not a linter; `run` still reports
+# files it would rewrite.
+formatters:
+  enable:
+    - gofmt
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
