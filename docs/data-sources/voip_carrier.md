@@ -31,17 +31,17 @@ data "jambonz_voip_carrier" "example" {
 - `application_sid` (String)
 - `description` (String)
 - `diversion` (String)
-- `e164_leading_plus` (Boolean)
+- `e164_leading_plus` (Number)
 - `inbound_auth_password` (String, Sensitive)
 - `inbound_auth_username` (String)
-- `is_active` (Boolean)
+- `is_active` (Number)
 - `name` (String)
 - `register_from_domain` (String) optional domain to apply in the From header
 - `register_from_user` (String) optional username to apply in the From header
 - `register_password` (String, Sensitive)
-- `register_public_ip_in_contact` (Boolean) if true, use our public ip in the Contact header; otherwise the sip realm
+- `register_public_ip_in_contact` (Number) if true, use our public ip in the Contact header; otherwise the sip realm
 - `register_sip_realm` (String)
-- `register_use_tls` (Boolean) whether to REGISTER over TLS
+- `register_use_tls` (Number) whether to REGISTER over TLS
 - `register_username` (String)
-- `requires_register` (Boolean)
+- `requires_register` (Number)
 - `tech_prefix` (String)

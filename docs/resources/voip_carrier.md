@@ -43,18 +43,18 @@ resource "jambonz_voip_carrier" "fastco" {
 - `application_sid` (String)
 - `description` (String)
 - `diversion` (String) Diversion header or phone number to apply to outbound calls
-- `e164_leading_plus` (Boolean) whether a leading + is required on INVITEs to this provider
+- `e164_leading_plus` (Number) whether a leading + is required on INVITEs to this provider
 - `inbound_auth_password` (String, Sensitive) challenge inbound calls with this username/password if supplied
 - `inbound_auth_username` (String) challenge inbound calls with this username/password if supplied
-- `is_active` (Boolean)
+- `is_active` (Number)
 - `register_from_domain` (String) optional domain to apply in From header
 - `register_from_user` (String) optional username to apply in From header
 - `register_password` (String, Sensitive) sip password to authenticate with, if registration is required
-- `register_public_ip_in_contact` (Boolean) if true, use our public ip in Contact header; otherwise, use sip realm
+- `register_public_ip_in_contact` (Number) if true, use our public ip in Contact header; otherwise, use sip realm
 - `register_sip_realm` (String) sip realm to authenticate with, if registration is required
-- `register_use_tls` (Boolean) wehther this provider requires us to send a REGISTER use TLS protocol
+- `register_use_tls` (Number) wehther this provider requires us to send a REGISTER use TLS protocol
 - `register_username` (String) sip username to authenticate with, if registration is required
-- `requires_register` (Boolean) wehther this provider requires us to send a REGISTER to them in order to receive calls
+- `requires_register` (Number) wehther this provider requires us to send a REGISTER to them in order to receive calls
 - `tech_prefix` (String) prefix to be applied to the called number for outbound call attempts
 
 ### Read-Only

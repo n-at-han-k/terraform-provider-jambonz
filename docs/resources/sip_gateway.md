@@ -35,10 +35,10 @@ resource "jambonz_sip_gateway" "fastco_east" {
 
 ### Optional
 
-- `inbound` (Boolean)
-- `is_active` (Boolean)
+- `inbound` (Number)
+- `is_active` (Number)
 - `netmask` (Number) CIDR prefix length for the gateway network
-- `outbound` (Boolean)
+- `outbound` (Number)
 - `port` (Number)
 
 ### Read-Only

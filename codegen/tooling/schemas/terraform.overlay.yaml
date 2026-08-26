@@ -189,6 +189,17 @@ actions:
         type: integer
       is_active:
         type: integer
+      # These two are booleans on the create body and nowhere in the record, so
+      # the glue read them back as bools while sending ints and would not
+      # compile:
+      #
+      #   voip_carrier_resource.go:185: bool does not satisfy integer
+      #
+      # Both sides of a field have to agree, whichever way it is declared.
+      register_use_tls:
+        type: integer
+      register_public_ip_in_contact:
+        type: integer
 
   - target: $.components.schemas.SipGateway.properties
     description: tinyint(1) columns, answered as numbers

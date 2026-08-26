@@ -1413,11 +1413,11 @@ type VoipCarrier struct {
 	RegisterPassword *string `json:"register_password,omitempty"`
 
 	// RegisterPublicIpInContact if true, use our public ip in the Contact header; otherwise the sip realm
-	RegisterPublicIpInContact *bool   `json:"register_public_ip_in_contact,omitempty"`
+	RegisterPublicIpInContact *int    `json:"register_public_ip_in_contact,omitempty"`
 	RegisterSipRealm          *string `json:"register_sip_realm,omitempty"`
 
 	// RegisterUseTls whether to REGISTER over TLS
-	RegisterUseTls   *bool               `json:"register_use_tls,omitempty"`
+	RegisterUseTls   *int                `json:"register_use_tls,omitempty"`
 	RegisterUsername *string             `json:"register_username,omitempty"`
 	RequiresRegister *int                `json:"requires_register,omitempty"`
 	TechPrefix       *string             `json:"tech_prefix,omitempty"`

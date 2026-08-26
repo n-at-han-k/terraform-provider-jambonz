@@ -27,9 +27,9 @@ data "jambonz_sip_gateway" "example" {
 
 ### Read-Only
 
-- `inbound` (Boolean)
+- `inbound` (Number)
 - `ipv4` (String)
 - `netmask` (Number)
-- `outbound` (Boolean)
+- `outbound` (Number)
 - `port` (Number)
 - `voip_carrier_sid` (String)

@@ -54,7 +54,7 @@ func VoipCarrierDataSourceSchema(ctx context.Context) schema.Schema {
 				Computed:  true,
 				Sensitive: true,
 			},
-			"register_public_ip_in_contact": schema.BoolAttribute{
+			"register_public_ip_in_contact": schema.Int64Attribute{
 				Computed:            true,
 				Description:         "if true, use our public ip in the Contact header; otherwise the sip realm",
 				MarkdownDescription: "if true, use our public ip in the Contact header; otherwise the sip realm",
@@ -62,7 +62,7 @@ func VoipCarrierDataSourceSchema(ctx context.Context) schema.Schema {
 			"register_sip_realm": schema.StringAttribute{
 				Computed: true,
 			},
-			"register_use_tls": schema.BoolAttribute{
+			"register_use_tls": schema.Int64Attribute{
 				Computed:            true,
 				Description:         "whether to REGISTER over TLS",
 				MarkdownDescription: "whether to REGISTER over TLS",
@@ -96,9 +96,9 @@ type VoipCarrierModel struct {
 	RegisterFromDomain        types.String `tfsdk:"register_from_domain"`
 	RegisterFromUser          types.String `tfsdk:"register_from_user"`
 	RegisterPassword          types.String `tfsdk:"register_password"`
-	RegisterPublicIpInContact types.Bool   `tfsdk:"register_public_ip_in_contact"`
+	RegisterPublicIpInContact types.Int64  `tfsdk:"register_public_ip_in_contact"`
 	RegisterSipRealm          types.String `tfsdk:"register_sip_realm"`
-	RegisterUseTls            types.Bool   `tfsdk:"register_use_tls"`
+	RegisterUseTls            types.Int64  `tfsdk:"register_use_tls"`
 	RegisterUsername          types.String `tfsdk:"register_username"`
 	RequiresRegister          types.Int64  `tfsdk:"requires_register"`
 	TechPrefix                types.String `tfsdk:"tech_prefix"`
