@@ -834,7 +834,10 @@ type ApiKey struct {
 
 // Application defines model for Application.
 type Application struct {
-	AccountSid     openapi_types.UUID  `json:"account_sid"`
+	AccountSid openapi_types.UUID `json:"account_sid"`
+
+	// AppJson Voice Application Json, call_hook will not be invoked if app_json is provided
+	AppJson        *string             `json:"app_json,omitempty"`
 	ApplicationSid *openapi_types.UUID `json:"application_sid,omitempty"`
 
 	// CallHook Example: {"method":"POST","url":"https://acme.com"}

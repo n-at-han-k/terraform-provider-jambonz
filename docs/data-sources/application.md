@@ -28,11 +28,14 @@ data "jambonz_application" "example" {
 ### Read-Only
 
 - `account_sid` (String)
+- `app_json` (String) Voice Application Json, call_hook will not be invoked if app_json is provided
 - `call_hook` (Attributes) (see [below for nested schema](#nestedatt--call_hook))
 - `call_status_hook` (Attributes) (see [below for nested schema](#nestedatt--call_status_hook))
-- `messaging_hook` (Attributes) (see [below for nested schema](#nestedatt--messaging_hook))
 - `name` (String)
-- `record_all_calls` (Number)
+- `speech_recognizer_language` (String)
+- `speech_recognizer_vendor` (String)
+- `speech_synthesis_vendor` (String)
+- `speech_synthesis_voice` (String)
 
 <a id="nestedatt--call_hook"></a>
 ### Nested Schema for `call_hook`
@@ -48,18 +51,6 @@ Read-Only:
 
 <a id="nestedatt--call_status_hook"></a>
 ### Nested Schema for `call_status_hook`
-
-Read-Only:
-
-- `method` (String)
-- `password` (String, Sensitive)
-- `url` (String)
-- `username` (String)
-- `webhook_sid` (String)
-
-
-<a id="nestedatt--messaging_hook"></a>
-### Nested Schema for `messaging_hook`
 
 Read-Only:
 

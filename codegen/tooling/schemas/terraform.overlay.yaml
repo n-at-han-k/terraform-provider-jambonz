@@ -167,6 +167,23 @@ actions:
       is_active:
         type: boolean
 
+  # And the same gap the other way round: the create body takes app_json and the
+  # Application record does not declare it, though the column exists and the API
+  # returns it. Without this the attribute is Optional+Computed with nothing to
+  # read it back from, so apply ends with
+  #
+  #   Provider returned invalid result object after apply: ... still indicated
+  #   an unknown value for jambonz_application.pipecat.app_json
+  #
+  # Every computed attribute has to be known once apply returns, and the only
+  # way to know this one is to read it.
+  - target: $.components.schemas.Application.properties
+    description: The create body takes app_json; the record omitted it
+    update:
+      app_json:
+        type: string
+        description: Voice Application Json, call_hook will not be invoked if app_json is provided
+
   - target: $.paths['/Accounts'].post.requestBody.content['application/json'].schema.properties
     description: The Account record carries device_calling_application_sid; the create body omitted it
     update:

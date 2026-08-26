@@ -52,9 +52,15 @@ resource "jambonz_application" "support_line" {
 - `account_sid` (String)
 - `call_hook` (Attributes) (see [below for nested schema](#nestedatt--call_hook))
 - `call_status_hook` (Attributes) (see [below for nested schema](#nestedatt--call_status_hook))
-- `messaging_hook` (Attributes) (see [below for nested schema](#nestedatt--messaging_hook))
 - `name` (String) application name
-- `record_all_calls` (Number)
+
+### Optional
+
+- `app_json` (String) Voice Application Json, call_hook will not be invoked if app_json is provided
+- `speech_recognizer_language` (String)
+- `speech_recognizer_vendor` (String)
+- `speech_synthesis_vendor` (String)
+- `speech_synthesis_voice` (String)
 
 ### Read-Only
 
@@ -65,13 +71,13 @@ resource "jambonz_application" "support_line" {
 
 Required:
 
-- `password` (String, Sensitive)
 - `url` (String)
-- `username` (String)
 
 Optional:
 
 - `method` (String)
+- `password` (String, Sensitive)
+- `username` (String)
 - `webhook_sid` (String)
 
 
@@ -80,28 +86,13 @@ Optional:
 
 Required:
 
-- `password` (String, Sensitive)
 - `url` (String)
-- `username` (String)
 
 Optional:
 
 - `method` (String)
-- `webhook_sid` (String)
-
-
-<a id="nestedatt--messaging_hook"></a>
-### Nested Schema for `messaging_hook`
-
-Required:
-
 - `password` (String, Sensitive)
-- `url` (String)
 - `username` (String)
-
-Optional:
-
-- `method` (String)
 - `webhook_sid` (String)
 
 ## Import

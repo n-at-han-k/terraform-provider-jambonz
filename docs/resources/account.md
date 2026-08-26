@@ -53,13 +53,13 @@ resource "jambonz_account" "acme" {
 
 Required:
 
-- `password` (String, Sensitive)
 - `url` (String)
-- `username` (String)
 
 Optional:
 
 - `method` (String)
+- `password` (String, Sensitive)
+- `username` (String)
 - `webhook_sid` (String)
 
 ## Import

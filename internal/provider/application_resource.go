@@ -30,7 +30,6 @@ import (
 var (
 	_ resource.Resource                = (*applicationResource)(nil)
 	_ resource.ResourceWithImportState = (*applicationResource)(nil)
-	_ resource.ResourceWithModifyPlan  = (*applicationResource)(nil)
 )
 
 func NewApplicationResource() resource.Resource { return &applicationResource{} }
@@ -178,6 +177,7 @@ func (r *applicationResource) Update(ctx context.Context, req resource.UpdateReq
 	// body that carries it.
 	body := jambonzapi.UpdateApplicationJSONRequestBody{}
 	setUUID(&body.AccountSid, plan.AccountSid)
+	setStringPtr(&body.AppJson, plan.AppJson)
 
 	if !plan.CallHook.IsNull() && !plan.CallHook.IsUnknown() {
 		callHook := ensure(&body.CallHook)
@@ -255,30 +255,6 @@ func (r *applicationResource) ImportState(ctx context.Context, req resource.Impo
 	resource.ImportStatePassthroughID(ctx, path.Root("application_sid"), req, resp)
 }
 
-// ModifyPlan forces replacement for the attributes the create body accepts and
-// the update body does not.
-//
-// Without it those attributes are settable, and changing one plans as an in-place
-// update that sends a body with no such property — the API stores nothing, the
-// apply reports success, and the next read shows the old value back. Which
-// attributes these are is not a judgement: it is the difference between the two
-// bodies, read from the spec.
-func (r *applicationResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	// Nothing to force on a create (no state) or a destroy (no plan).
-	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
-		return
-	}
-	var plan, state resource_application.ApplicationModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	if !plan.AppJson.Equal(state.AppJson) {
-		resp.RequiresReplace = append(resp.RequiresReplace, path.Root("app_json"))
-	}
-}
-
 // fetch reads the record addressed by data.ApplicationSid and copies it onto data.
 // It reports whether the record exists, and whether the caller should carry on —
 // a 404 is the first and not the second, and every other failure is neither.
@@ -307,6 +283,7 @@ func (r *applicationResource) apply(ctx context.Context, data *resource_applicat
 		return
 	}
 	data.AccountSid = uuidValue(p.AccountSid)
+	data.AppJson = types.StringPointerValue((*string)(p.AppJson))
 
 	if p.CallHook == nil {
 		data.CallHook = resource_application.NewCallHookValueNull()

@@ -30,12 +30,12 @@ resource "jambonz_phone_number" "main" {
 
 ### Required
 
-- `account_sid` (String)
 - `number` (String) telephone number
 - `voip_carrier_sid` (String)
 
 ### Optional
 
+- `account_sid` (String)
 - `application_sid` (String)
 
 ### Read-Only

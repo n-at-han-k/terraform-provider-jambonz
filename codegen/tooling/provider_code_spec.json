@@ -93,6 +93,13 @@
 						}
 					},
 					{
+						"name": "app_json",
+						"string": {
+							"computed_optional_required": "computed",
+							"description": "Voice Application Json, call_hook will not be invoked if app_json is provided"
+						}
+					},
+					{
 						"name": "call_hook",
 						"single_nested": {
 							"attributes": [

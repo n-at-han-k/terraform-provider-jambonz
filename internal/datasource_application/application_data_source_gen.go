@@ -21,6 +21,11 @@ func ApplicationDataSourceSchema(ctx context.Context) schema.Schema {
 			"account_sid": schema.StringAttribute{
 				Computed: true,
 			},
+			"app_json": schema.StringAttribute{
+				Computed:            true,
+				Description:         "Voice Application Json, call_hook will not be invoked if app_json is provided",
+				MarkdownDescription: "Voice Application Json, call_hook will not be invoked if app_json is provided",
+			},
 			"application_sid": schema.StringAttribute{
 				Required: true,
 			},
@@ -97,6 +102,7 @@ func ApplicationDataSourceSchema(ctx context.Context) schema.Schema {
 
 type ApplicationModel struct {
 	AccountSid               types.String        `tfsdk:"account_sid"`
+	AppJson                  types.String        `tfsdk:"app_json"`
 	ApplicationSid           types.String        `tfsdk:"application_sid"`
 	CallHook                 CallHookValue       `tfsdk:"call_hook"`
 	CallStatusHook           CallStatusHookValue `tfsdk:"call_status_hook"`

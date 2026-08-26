@@ -44,9 +44,4 @@ data "jambonz_voip_carrier" "example" {
 - `register_use_tls` (Boolean) whether to REGISTER over TLS
 - `register_username` (String)
 - `requires_register` (Boolean)
-- `smpp_enquire_link_interval` (Number)
-- `smpp_inbound_password` (String, Sensitive)
-- `smpp_inbound_system_id` (String)
-- `smpp_password` (String, Sensitive)
-- `smpp_system_id` (String)
 - `tech_prefix` (String)

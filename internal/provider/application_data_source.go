@@ -99,6 +99,7 @@ func (d *applicationDataSource) apply(ctx context.Context, data *datasource_appl
 	}
 	data.ApplicationSid = uuidPointerValue(p.ApplicationSid)
 	data.AccountSid = uuidValue(p.AccountSid)
+	data.AppJson = types.StringPointerValue((*string)(p.AppJson))
 
 	if p.CallHook == nil {
 		data.CallHook = datasource_application.NewCallHookValueNull()
