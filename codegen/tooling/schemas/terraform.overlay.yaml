@@ -93,11 +93,55 @@ actions:
     update:
       readOnly: true
 
+  # ---- what the server accepts once ---------------------------------------
+  #
+  # x-immutable is readOnly's sibling: a property the API takes on create and
+  # refuses on update. The three below are guarded by hand in the
+  # implementation --
+  #
+  #   lib/routes/api/accounts.js:521
+  #     if (req.body.service_provider_sid) throw ... 'service_provider_sid may not be modified'
+  #   lib/routes/api/phone-numbers.js:72-73
+  #     if (req.body.voip_carrier_sid) throw ... 'voip_carrier_sid may not be modified'
+  #     if (req.body.number)           throw ... 'number may not be modified'
+  #
+  # -- and the spec says nothing about it, so cmd/gen sent them in the PUT body
+  # like any other property and every update of an account or a phone number
+  # failed, whether or not the value had changed:
+  #
+  #   Error: Unexpected status
+  #     with jambonz_phone_number.test
+  #     {"msg":"voip_carrier_sid may not be modified"}
+  #
+  # The generated acceptance tests found all three on their first run.
+  #
+  # Saying it here does two things at once: the property leaves the update body,
+  # and an attribute in the create body and not the update body is precisely
+  # cmd/gen's definition of ForceNew -- so changing one now plans as a
+  # replacement, which is the only way the API will honour it.
+  - target: $.components.schemas.Account.properties.service_provider_sid
+    description: Accepted on create, rejected on update; changing it replaces the account
+    update:
+      x-immutable: true
+
+  - target: $.components.schemas.PhoneNumber.properties.voip_carrier_sid
+    description: Accepted on create, rejected on update; changing it replaces the number
+    update:
+      x-immutable: true
+
+  - target: $.components.schemas.PhoneNumber.properties.number
+    description: Accepted on create, rejected on update; changing it replaces the number
+    update:
+      x-immutable: true
+
   # ---- secrets -------------------------------------------------------------
   #
   # tfplugingen-openapi marks an attribute sensitive from `format: password`, and
-  # sensitive is why cmd/gen writes these back only when the server actually sent
-  # one: a secret the API omits on read must not be overwritten with null.
+  # sensitive here means exactly one thing: Terraform redacts the value in plan
+  # and state output. It does not change how the value is read back. This API
+  # answers every read with `SELECT * from <table>`, so a password column is
+  # returned on every read — null when it was never set — and cmd/gen reads it
+  # like any other column.
   - target: $.components.schemas.Webhook.properties.password
     description: Basic-auth secret for the webhook
     update:
@@ -230,6 +274,22 @@ actions:
         type: integer
       outbound:
         type: integer
+
+  # The same gap on SipGateway, and the same failure: is_active is a column in
+  # sip_gateways, the create body takes it, `SELECT *` returns it, and the record
+  # schema does not declare it. A gateway that leaves is_active out of its
+  # resource block plans it as unknown, and nothing in the read can settle it:
+  #
+  #   Provider returned invalid result object after apply: ... still indicated
+  #   an unknown value for jambonz_sip_gateway.livekit.is_active
+  #
+  # tinyint(1), so integer here for the same reason as its siblings above.
+  - target: $.components.schemas.SipGateway.properties
+    description: The create body takes is_active; the record omitted it
+    update:
+      is_active:
+        type: integer
+        description: whether the gateway is active
 
   # And the same gap the other way round: the create body takes app_json and the
   # Application record does not declare it, though the column exists and the API

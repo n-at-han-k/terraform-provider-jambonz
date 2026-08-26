@@ -104,6 +104,23 @@ type schemaObject struct {
 	// one thing NOT derived from the entity.
 	Description string                 `json:"description"`
 	ReadOnly   bool                    `json:"readOnly"`
+	// Immutable is `x-immutable`, the overlay's word for a property the API
+	// accepts on create and refuses on update:
+	//
+	//	{"msg":"voip_carrier_sid may not be modified"}
+	//
+	// readOnly cannot say this — it would stop the create sending the property
+	// too — and neither can the document's shape, because every jambonz update
+	// is a whole-record PUT whose body $refs the record, so the update body
+	// carries every property the record does. The alternative is giving each
+	// such PUT an inline copy of the record schema minus a field or two, which
+	// states the same fact at forty times the length and silently rots when the
+	// record gains a property.
+	//
+	// An immutable property is in the create body and not the update body,
+	// which is exactly Attribute.ForceNew — so saying this makes changing one
+	// replace the record, rather than plan as an update the API rejects.
+	Immutable  bool                    `json:"x-immutable"`
 	// AllOf carries the one composition this document uses: `nullable: true` beside
 	// an `allOf` of a single $ref, which is how OpenAPI 3.0 spells a nullable
 	// reference — a $ref may not have siblings, so the reference is wrapped.
@@ -759,7 +776,7 @@ func (d Document) annotateLevel(attrs []Attribute, createBody, updateBody, recor
 			a.CreateRequired = createReq[a.Name]
 			a.CreateUUID = isUUID(prop)
 		}
-		if prop, ok := updateBody.Properties[a.Name]; ok && !prop.ReadOnly {
+		if prop, ok := updateBody.Properties[a.Name]; ok && !prop.ReadOnly && !prop.Immutable {
 			a.InUpdate = true
 			a.UpdateRequired = updateReq[a.Name]
 			a.UpdateUUID = isUUID(prop)

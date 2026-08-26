@@ -83,9 +83,24 @@ test: gen
 	$(GO) test ./...
 	cd codegen/tooling && GOWORK=off $(GO) test ./...
 
+# The acceptance tests need a live api-server, so this owns one: up before,
+# down -v after, whatever the tests did. -v on the way down because the schema
+# and its seed are part of the fixture, and a database half full of the last
+# run's records is not a clean starting point for the next one.
+COMPOSE ?= docker compose -f test/docker-compose.yml
+
+.PHONY: testacc-up
+testacc-up:
+	$(COMPOSE) up -d --wait
+
+.PHONY: testacc-down
+testacc-down:
+	$(COMPOSE) down -v
+
 .PHONY: testacc
-testacc: gen
-	TF_ACC=1 $(GO) test -v -cover -timeout 120m ./...
+testacc: gen testacc-up
+	TF_ACC=1 $(GO) test -v -cover -timeout 120m ./... ; \
+	  status=$$? ; $(MAKE) testacc-down ; exit $$status
 
 .PHONY: fmt
 fmt:

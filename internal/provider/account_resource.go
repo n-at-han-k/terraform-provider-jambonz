@@ -30,6 +30,7 @@ import (
 var (
 	_ resource.Resource                = (*accountResource)(nil)
 	_ resource.ResourceWithImportState = (*accountResource)(nil)
+	_ resource.ResourceWithModifyPlan  = (*accountResource)(nil)
 )
 
 func NewAccountResource() resource.Resource { return &accountResource{} }
@@ -175,7 +176,6 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 		setString(&registrationHook.Url, plan.RegistrationHook.Url)
 		setStringPtr(&registrationHook.Username, plan.RegistrationHook.Username)
 	}
-	setUUID(&body.ServiceProviderSid, plan.ServiceProviderSid)
 	setStringPtr(&body.SipRealm, plan.SipRealm)
 
 	id := plan.AccountSid.ValueString()
@@ -233,6 +233,30 @@ func (r *accountResource) ImportState(ctx context.Context, req resource.ImportSt
 	resource.ImportStatePassthroughID(ctx, path.Root("account_sid"), req, resp)
 }
 
+// ModifyPlan forces replacement for the attributes the create body accepts and
+// the update body does not.
+//
+// Without it those attributes are settable, and changing one plans as an in-place
+// update that sends a body with no such property — the API stores nothing, the
+// apply reports success, and the next read shows the old value back. Which
+// attributes these are is not a judgement: it is the difference between the two
+// bodies, read from the spec.
+func (r *accountResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// Nothing to force on a create (no state) or a destroy (no plan).
+	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
+		return
+	}
+	var plan, state resource_account.AccountModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if !plan.ServiceProviderSid.Equal(state.ServiceProviderSid) {
+		resp.RequiresReplace = append(resp.RequiresReplace, path.Root("service_provider_sid"))
+	}
+}
+
 // fetch reads the record addressed by data.AccountSid and copies it onto data.
 // It reports whether the record exists, and whether the caller should carry on —
 // a 404 is the first and not the second, and every other failure is neither.
@@ -254,8 +278,17 @@ func (r *accountResource) fetch(ctx context.Context, data *resource_account.Acco
 	return true, !diags.HasError()
 }
 
-// apply copies the API representation onto the Terraform model. Computed
-// attributes are written unconditionally — that is what makes drift visible.
+// apply copies the API representation onto the Terraform model. Every attribute
+// the record carries is written unconditionally — that is what makes drift
+// visible, and it is also what settles the unknowns a create leaves behind.
+//
+// Secrets are not an exception, because this API does not treat them as one:
+// every read is `SELECT * from <table>`, so a password column comes back on
+// every read and comes back null when it was never set. Writing those back only
+// when non-nil — the usual defence against an API that discloses a secret once —
+// leaves an unconfigured secret unknown for ever, and Terraform ends the apply
+// with "provider returned invalid result object after apply". A column this API
+// always sends is read like any other column.
 func (r *accountResource) apply(ctx context.Context, data *resource_account.AccountModel, p *jambonzapi.Account, diags *diag.Diagnostics) {
 	if p == nil {
 		return

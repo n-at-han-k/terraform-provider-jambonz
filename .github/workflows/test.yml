@@ -97,7 +97,14 @@ jobs:
           key: tfplugingen-${{ runner.os }}-${{ hashFiles('GNUmakefile') }}
       - run: make verify
 
-  # Run acceptance tests in a matrix with Terraform CLI versions
+  # Run acceptance tests in a matrix with Terraform CLI versions.
+  #
+  # These need a live jambonz api-server, which test/docker-compose.yml provides:
+  # the failures they cover — a value left unknown after apply, an attribute that
+  # reads back differently from how it was written — are a conversation between
+  # Terraform and a real server, and nothing short of one has that conversation.
+  # The harness fails rather than skips when the server is missing, so a broken
+  # testbed cannot pass as an empty suite.
   test:
     name: Terraform Provider Acceptance Tests
     needs: build
@@ -121,7 +128,18 @@ jobs:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
       - run: go mod download
+      # --wait holds until every healthcheck passes and the two one-shot
+      # services — the schema migration and the seed — have exited 0, so a
+      # half-built database fails here rather than as a puzzling test error.
+      - name: Start the api-server testbed
+        run: docker compose -f test/docker-compose.yml up -d --wait
       - env:
           TF_ACC: "1"
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10
+      - name: api-server logs
+        if: failure()
+        run: docker compose -f test/docker-compose.yml logs --no-color
+      - name: Stop the testbed
+        if: always()
+        run: docker compose -f test/docker-compose.yml down -v

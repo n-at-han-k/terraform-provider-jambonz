@@ -209,6 +209,7 @@ func main() {
 		openAPIPath = flag.String("openapi", "../../build/openapi.tf.json", "path to the Terraform-shaped OpenAPI document, as JSON")
 		provDir     = flag.String("provider-dir", "../../internal/provider", "output dir for Terraform CRUD glue")
 		tmplDir     = flag.String("templates", "templates", "template directory")
+		fixturePath = flag.String("fixtures", "schemas/acceptance.json", "path to the acceptance-test fixtures")
 		normalizeIR = flag.Bool("normalize", false, "rewrite the IR in place instead of rendering (stage 4a\u2032; see normalize.go)")
 	)
 	flag.Parse()
@@ -230,7 +231,7 @@ func main() {
 		"join":        strings.Join,
 		"dict":        dict,
 	}
-	renderProvider(readSpec(*specPath), readDocument(*openAPIPath), funcs, *tmplDir, *provDir)
+	renderProvider(readSpec(*specPath), readDocument(*openAPIPath), readFixtures(*fixturePath), funcs, *tmplDir, *provDir)
 }
 
 func readSpec(path string) Specification {
@@ -251,10 +252,13 @@ type resourceData struct {
 	Resource
 	Provider string
 	Wire     Binding
+	// Fixture is the acceptance-test fixture for this resource. Empty for a data
+	// source, which the test template is not rendered for.
+	Fixture Fixture
 }
 
 // renderProvider emits the Terraform CRUD glue, one file per resource in the IR.
-func renderProvider(spec Specification, doc Document, funcs template.FuncMap, tmplDir, provDir string) {
+func renderProvider(spec Specification, doc Document, fixtures map[string]Fixture, funcs template.FuncMap, tmplDir, provDir string) {
 	// The conversion fragments are parsed into both sets: a data source decodes a
 	// record exactly as the resource does, and two copies of that would drift.
 	shared := filepath.Join(tmplDir, "_shared.tmpl")
@@ -262,6 +266,8 @@ func renderProvider(spec Specification, doc Document, funcs template.FuncMap, tm
 		ParseFiles(filepath.Join(tmplDir, "resource.go.tmpl"), shared))
 	dsTmpl := template.Must(template.New("data_source.go.tmpl").Funcs(funcs).
 		ParseFiles(filepath.Join(tmplDir, "data_source.go.tmpl"), shared))
+	testTmpl := template.Must(template.New("resource_test.go.tmpl").Funcs(funcs).
+		ParseFiles(filepath.Join(tmplDir, "resource_test.go.tmpl"), shared))
 
 	for _, r := range spec.Resources {
 		for i := range r.Schema.Attributes {
@@ -275,9 +281,17 @@ func renderProvider(spec Specification, doc Document, funcs template.FuncMap, tm
 		if err != nil {
 			log.Fatalf("resource %q: %v", r.Name, err)
 		}
-		data := resourceData{Resource: r, Provider: spec.Provider.Name, Wire: wire}
+		// A resource with no fixture has no acceptance test, and that is a
+		// decision someone has to make rather than an omission that goes
+		// unnoticed: every resource in the IR is covered, or this fails.
+		fixture, ok := fixtures[r.Name]
+		if !ok {
+			log.Fatalf("resource %q: no entry in the acceptance fixtures; add one to schemas/acceptance.json", r.Name)
+		}
+		data := resourceData{Resource: r, Provider: spec.Provider.Name, Wire: wire, Fixture: fixture}
 
 		render(resTmpl, data, filepath.Join(provDir, r.Name+"_resource.go"))
+		render(testTmpl, data, filepath.Join(provDir, r.Name+"_resource_test.go"))
 	}
 
 	for _, d := range spec.DataSources {

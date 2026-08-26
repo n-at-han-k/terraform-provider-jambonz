@@ -29,7 +29,6 @@ import (
 var (
 	_ resource.Resource                = (*sipGatewayResource)(nil)
 	_ resource.ResourceWithImportState = (*sipGatewayResource)(nil)
-	_ resource.ResourceWithModifyPlan  = (*sipGatewayResource)(nil)
 )
 
 func NewSipGatewayResource() resource.Resource { return &sipGatewayResource{} }
@@ -162,6 +161,7 @@ func (r *sipGatewayResource) Update(ctx context.Context, req resource.UpdateRequ
 	body := jambonzapi.UpdateSipGatewayJSONRequestBody{}
 	setIntPtr(&body.Inbound, plan.Inbound)
 	setString(&body.Ipv4, plan.Ipv4)
+	setIntPtr(&body.IsActive, plan.IsActive)
 	setFloat(&body.Netmask, plan.Netmask)
 	setIntPtr(&body.Outbound, plan.Outbound)
 	setFloat(&body.Port, plan.Port)
@@ -222,30 +222,6 @@ func (r *sipGatewayResource) ImportState(ctx context.Context, req resource.Impor
 	resource.ImportStatePassthroughID(ctx, path.Root("sip_gateway_sid"), req, resp)
 }
 
-// ModifyPlan forces replacement for the attributes the create body accepts and
-// the update body does not.
-//
-// Without it those attributes are settable, and changing one plans as an in-place
-// update that sends a body with no such property — the API stores nothing, the
-// apply reports success, and the next read shows the old value back. Which
-// attributes these are is not a judgement: it is the difference between the two
-// bodies, read from the spec.
-func (r *sipGatewayResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	// Nothing to force on a create (no state) or a destroy (no plan).
-	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
-		return
-	}
-	var plan, state resource_sip_gateway.SipGatewayModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	if !plan.IsActive.Equal(state.IsActive) {
-		resp.RequiresReplace = append(resp.RequiresReplace, path.Root("is_active"))
-	}
-}
-
 // fetch reads the record addressed by data.SipGatewaySid and copies it onto data.
 // It reports whether the record exists, and whether the caller should carry on —
 // a 404 is the first and not the second, and every other failure is neither.
@@ -267,14 +243,24 @@ func (r *sipGatewayResource) fetch(ctx context.Context, data *resource_sip_gatew
 	return true, !diags.HasError()
 }
 
-// apply copies the API representation onto the Terraform model. Computed
-// attributes are written unconditionally — that is what makes drift visible.
+// apply copies the API representation onto the Terraform model. Every attribute
+// the record carries is written unconditionally — that is what makes drift
+// visible, and it is also what settles the unknowns a create leaves behind.
+//
+// Secrets are not an exception, because this API does not treat them as one:
+// every read is `SELECT * from <table>`, so a password column comes back on
+// every read and comes back null when it was never set. Writing those back only
+// when non-nil — the usual defence against an API that discloses a secret once —
+// leaves an unconfigured secret unknown for ever, and Terraform ends the apply
+// with "provider returned invalid result object after apply". A column this API
+// always sends is read like any other column.
 func (r *sipGatewayResource) apply(ctx context.Context, data *resource_sip_gateway.SipGatewayModel, p *jambonzapi.SipGateway, diags *diag.Diagnostics) {
 	if p == nil {
 		return
 	}
 	data.Inbound = int64PointerValue(p.Inbound)
 	data.Ipv4 = types.StringValue(string(p.Ipv4))
+	data.IsActive = int64PointerValue(p.IsActive)
 	data.Netmask = floatValue(p.Netmask)
 	data.Outbound = int64PointerValue(p.Outbound)
 	data.Port = floatValue(p.Port)

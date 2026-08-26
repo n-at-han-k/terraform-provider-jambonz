@@ -1,0 +1,120 @@
+# The acceptance-test target: a real jambonz api-server, on the image the
+# cluster runs, over a real MySQL. These tests exist because the bugs they
+# cover are not visible to a unit test — "provider returned invalid result
+# object after apply" is a conversation between Terraform and a live server
+# about which values came back, and only a live server can have that
+# conversation.
+#
+#   docker compose -f test/docker-compose.yml up -d --wait
+#   make testacc
+#   docker compose -f test/docker-compose.yml down -v
+#
+# `make testacc` starts and stops this itself; the commands above are for
+# keeping the stack up across runs.
+#
+# The tests drive a real Terraform CLI, and it has to be Terraform rather than
+# OpenTofu: terraform-plugin-testing hands the CLI a provider address in the
+# legacy "-" namespace, which tofu rejects outright --
+#
+#   Invalid provider namespace: The legacy provider namespace "-" can be used
+#   only with hostname registry.opentofu.org
+#
+# -- before a single resource is planned. terraform-plugin-testing downloads a
+# Terraform if it cannot find one; point TF_ACC_TERRAFORM_PATH at a binary to
+# use your own. This is a constraint of the test harness only, and says nothing
+# about which CLI the provider itself works with.
+name: jambonz-provider-acc
+
+services:
+  mysql:
+    # 5.7, because that is what charts/jambonz/values.yaml pins and the schema
+    # is applied by the api-server's own migration job — which is entitled to
+    # emit DDL that only its own MySQL accepts.
+    image: mysql:5.7
+    environment:
+      # A real password, not MYSQL_ALLOW_EMPTY_PASSWORD: the migration job
+      # asserts JAMBONES_MYSQL_PASSWORD is non-empty and exits before it
+      # connects.
+      MYSQL_ROOT_PASSWORD: jambones
+      MYSQL_DATABASE: jambones
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--protocol", "tcp"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+  # The schema, and the seed that comes with it. `npm run upgrade-db` is the
+  # api-server's own migration entrypoint, so the tests run against the schema
+  # the server expects rather than one transcribed here -- and its seed is
+  # where the admin token and the default account below come from.
+  db-create:
+    image: jambonz/api-server:10.0.3
+    # Dockerfile.db-create in the api-server checkout is the same image with
+    # this as its CMD, so running it here is the same thing without a build.
+    command: ["npm", "run", "upgrade-db"]
+    restart: "no"
+    environment:
+      NODE_ENV: production
+      JAMBONES_MYSQL_HOST: mysql
+      JAMBONES_MYSQL_PORT: "3306"
+      JAMBONES_MYSQL_USER: root
+      JAMBONES_MYSQL_PASSWORD: jambones
+      JAMBONES_MYSQL_DATABASE: jambones
+      JAMBONES_LOGLEVEL: info
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # The migration's own admin key has a freshly generated token, which a test
+  # cannot know. This adds one with a token that is a constant.
+  seed:
+    image: mysql:5.7
+    restart: "no"
+    command: ["sh", "-c", "mysql -h mysql -uroot -pjambones -D jambones < /seed.sql"]
+    volumes:
+      - ./seed.sql:/seed.sql:ro
+    depends_on:
+      db-create:
+        condition: service_completed_successfully
+
+  api-server:
+    image: jambonz/api-server:10.0.3
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      HTTP_PORT: "3000"
+      JAMBONES_MYSQL_HOST: mysql
+      JAMBONES_MYSQL_PORT: "3306"
+      JAMBONES_MYSQL_USER: root
+      JAMBONES_MYSQL_PASSWORD: jambones
+      JAMBONES_MYSQL_DATABASE: jambones
+      JAMBONES_REDIS_HOST: redis
+      JAMBONES_REDIS_PORT: "6379"
+      JAMBONES_LOGLEVEL: info
+      JAMBONES_TIME_SERIES_HOST: influxdb
+      JAMBONES_CREATE_CALL_URL: http://localhost/v1/createCall
+      ENCRYPTION_SECRET: acceptance-test-secret
+      # app.js asserts this at startup even though these tests authenticate
+      # with an api key rather than a JWT.
+      JWT_SECRET: acceptance-test-secret
+    healthcheck:
+      # /health is unauthenticated; a 200 from it means the server is up and
+      # has its database handle.
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3000/health"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    depends_on:
+      redis:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully

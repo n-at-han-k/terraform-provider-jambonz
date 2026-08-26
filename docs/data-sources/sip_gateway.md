@@ -29,6 +29,7 @@ data "jambonz_sip_gateway" "example" {
 
 - `inbound` (Number)
 - `ipv4` (String)
+- `is_active` (Number) whether the gateway is active
 - `netmask` (Number)
 - `outbound` (Number)
 - `port` (Number)

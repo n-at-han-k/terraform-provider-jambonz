@@ -36,7 +36,7 @@ resource "jambonz_sip_gateway" "fastco_east" {
 ### Optional
 
 - `inbound` (Number)
-- `is_active` (Number)
+- `is_active` (Number) whether the gateway is active
 - `netmask` (Number) CIDR prefix length for the gateway network
 - `outbound` (Number)
 - `port` (Number)

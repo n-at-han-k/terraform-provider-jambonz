@@ -270,6 +270,13 @@
 						}
 					},
 					{
+						"int64": {
+							"computed_optional_required": "computed",
+							"description": "whether the gateway is active"
+						},
+						"name": "is_active"
+					},
+					{
 						"name": "netmask",
 						"number": {
 							"computed_optional_required": "computed"
@@ -733,7 +740,8 @@
 					},
 					{
 						"int64": {
-							"computed_optional_required": "computed_optional"
+							"computed_optional_required": "computed_optional",
+							"description": "whether the gateway is active"
 						},
 						"name": "is_active"
 					},

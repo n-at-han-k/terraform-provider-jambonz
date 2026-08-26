@@ -276,8 +276,17 @@ func (r *applicationResource) fetch(ctx context.Context, data *resource_applicat
 	return true, !diags.HasError()
 }
 
-// apply copies the API representation onto the Terraform model. Computed
-// attributes are written unconditionally — that is what makes drift visible.
+// apply copies the API representation onto the Terraform model. Every attribute
+// the record carries is written unconditionally — that is what makes drift
+// visible, and it is also what settles the unknowns a create leaves behind.
+//
+// Secrets are not an exception, because this API does not treat them as one:
+// every read is `SELECT * from <table>`, so a password column comes back on
+// every read and comes back null when it was never set. Writing those back only
+// when non-nil — the usual defence against an API that discloses a secret once —
+// leaves an unconfigured secret unknown for ever, and Terraform ends the apply
+// with "provider returned invalid result object after apply". A column this API
+// always sends is read like any other column.
 func (r *applicationResource) apply(ctx context.Context, data *resource_application.ApplicationModel, p *jambonzapi.Application, diags *diag.Diagnostics) {
 	if p == nil {
 		return

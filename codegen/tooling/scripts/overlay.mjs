@@ -73,6 +73,69 @@ if (resultData.totalUnusedActions > 0) {
   process.exit(1);
 }
 
+// ## Stage 3b: derive the update bodies that x-immutable implies
+//
+// The overlay marks a property `x-immutable` when the API accepts it on create
+// and refuses it on update — see the "what the server accepts once" section of
+// terraform.overlay.yaml for the three, and the implementation lines that
+// enforce them.
+//
+// Saying so is not enough on its own, because every jambonz update is a
+// whole-record PUT whose body `$ref`s the record. Marking the property changes
+// what cmd/gen *sends*, but oapi-codegen still renders the body from the record
+// schema — and a property the record requires becomes a non-pointer Go field
+// with no omitempty. It is then serialised whatever the provider does with it,
+// as the zero value, and the zero UUID is
+//
+//   "00000000-0000-0000-0000-000000000000"
+//
+// which is a perfectly truthy string to `if (req.body.service_provider_sid)`.
+// So the update failed with "may not be modified" about a property Terraform
+// never set, and no amount of care on the Go side could have avoided it: the
+// property has to be absent from the body *schema*.
+//
+// Hence this pass. Every PUT whose body $refs a schema with x-immutable
+// properties gets its own <Name>Update schema — the record, minus those
+// properties, minus them from `required`. It is derived rather than written out
+// in the overlay because a hand-copy of a forty-property schema is a copy that
+// rots the moment the record gains a property, and silently: the copy would
+// still be valid, just short.
+const immutableProps = (schema) =>
+  Object.entries(schema?.properties ?? {})
+    .filter(([, prop]) => prop?.['x-immutable'])
+    .map(([name]) => name);
+
+let derived = 0;
+for (const [path, item] of Object.entries(data.paths ?? {})) {
+  const body = item?.put?.requestBody?.content?.['application/json']?.schema;
+  const ref = body?.$ref;
+  if (!ref?.startsWith('#/components/schemas/')) continue;
+
+  const name = ref.slice('#/components/schemas/'.length);
+  const record = data.components?.schemas?.[name];
+  const immutable = immutableProps(record);
+  if (immutable.length === 0) continue;
+
+  const updateName = `${name}Update`;
+  const properties = {...record.properties};
+  for (const prop of immutable) delete properties[prop];
+
+  data.components.schemas[updateName] = {
+    ...record,
+    description:
+      `${name}, minus the properties the API refuses on update ` +
+      `(${immutable.join(', ')}). Derived by scripts/overlay.mjs from x-immutable; do not edit.`,
+    properties,
+    required: (record.required ?? []).filter((prop) => !immutable.includes(prop)),
+  };
+  item.put.requestBody.content['application/json'].schema = {$ref: `#/components/schemas/${updateName}`};
+  console.log(`derived ${updateName} for PUT ${path}: dropped ${immutable.join(', ')}`);
+  derived++;
+}
+if (derived > 0) {
+  console.log(`derived ${derived} update schema(s) from x-immutable`);
+}
+
 // Same sort the openapi-format CLI applies by default, so the reviewable YAML
 // keeps its stable key order across regenerations.
 const {data: sorted} = await openapiFormat.openapiSort(data, {sortSet: await openapiFormat.getDefaultSortSet()});

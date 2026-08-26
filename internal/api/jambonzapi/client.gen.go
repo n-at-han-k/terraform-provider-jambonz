@@ -807,6 +807,17 @@ type Account struct {
 	SipRealm           *string            `json:"sip_realm,omitempty"`
 }
 
+// AccountUpdate Account, minus the properties the API refuses on update (service_provider_sid). Derived by scripts/overlay.mjs from x-immutable; do not edit.
+type AccountUpdate struct {
+	AccountSid                  *openapi_types.UUID `json:"account_sid,omitempty"`
+	DeviceCallingApplicationSid *openapi_types.UUID `json:"device_calling_application_sid,omitempty"`
+	Name                        string              `json:"name"`
+
+	// RegistrationHook Example: {"method":"POST","url":"https://acme.com"}
+	RegistrationHook *Webhook `json:"registration_hook,omitempty"`
+	SipRealm         *string  `json:"sip_realm,omitempty"`
+}
+
 // Alert defines model for Alert.
 type Alert struct {
 	AccountSid     openapi_types.UUID  `json:"account_sid"`
@@ -1037,6 +1048,13 @@ type PhoneNumber struct {
 	VoipCarrierSid openapi_types.UUID  `json:"voip_carrier_sid"`
 }
 
+// PhoneNumberUpdate PhoneNumber, minus the properties the API refuses on update (number, voip_carrier_sid). Derived by scripts/overlay.mjs from x-immutable; do not edit.
+type PhoneNumberUpdate struct {
+	AccountSid     *openapi_types.UUID `json:"account_sid,omitempty"`
+	ApplicationSid *openapi_types.UUID `json:"application_sid,omitempty"`
+	PhoneNumberSid *openapi_types.UUID `json:"phone_number_sid,omitempty"`
+}
+
 // PredefinedCarrier defines model for PredefinedCarrier.
 type PredefinedCarrier struct {
 	Diversion                 *string            `json:"diversion,omitempty"`
@@ -1148,8 +1166,11 @@ type ServiceProvider struct {
 
 // SipGateway defines model for SipGateway.
 type SipGateway struct {
-	Inbound        *int                `json:"inbound,omitempty"`
-	Ipv4           string              `json:"ipv4"`
+	Inbound *int   `json:"inbound,omitempty"`
+	Ipv4    string `json:"ipv4"`
+
+	// IsActive whether the gateway is active
+	IsActive       *int                `json:"is_active,omitempty"`
 	Netmask        float32             `json:"netmask"`
 	Outbound       *int                `json:"outbound,omitempty"`
 	Port           float32             `json:"port"`
@@ -2131,7 +2152,7 @@ type OnRegistrationAttempt200JSONResponseBodyStatus string
 type CreateAccountJSONRequestBody CreateAccountJSONBody
 
 // UpdateAccountJSONRequestBody defines body for UpdateAccount for application/json ContentType.
-type UpdateAccountJSONRequestBody = Account
+type UpdateAccountJSONRequestBody = AccountUpdate
 
 // CreateCallJSONRequestBody defines body for CreateCall for application/json ContentType.
 type CreateCallJSONRequestBody CreateCallJSONBody
@@ -2215,7 +2236,7 @@ type PutTenantJSONRequestBody = MsTeamsTenant
 type CreatePhoneNumberJSONRequestBody CreatePhoneNumberJSONBody
 
 // UpdatePhoneNumberJSONRequestBody defines body for UpdatePhoneNumber for application/json ContentType.
-type UpdatePhoneNumberJSONRequestBody = PhoneNumber
+type UpdatePhoneNumberJSONRequestBody = PhoneNumberUpdate
 
 // CreateSbcJSONRequestBody defines body for CreateSbc for application/json ContentType.
 type CreateSbcJSONRequestBody CreateSbcJSONBody

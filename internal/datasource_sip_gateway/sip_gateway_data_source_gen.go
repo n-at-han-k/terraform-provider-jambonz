@@ -18,6 +18,11 @@ func SipGatewayDataSourceSchema(ctx context.Context) schema.Schema {
 			"ipv4": schema.StringAttribute{
 				Computed: true,
 			},
+			"is_active": schema.Int64Attribute{
+				Computed:            true,
+				Description:         "whether the gateway is active",
+				MarkdownDescription: "whether the gateway is active",
+			},
 			"netmask": schema.NumberAttribute{
 				Computed: true,
 			},
@@ -40,6 +45,7 @@ func SipGatewayDataSourceSchema(ctx context.Context) schema.Schema {
 type SipGatewayModel struct {
 	Inbound        types.Int64  `tfsdk:"inbound"`
 	Ipv4           types.String `tfsdk:"ipv4"`
+	IsActive       types.Int64  `tfsdk:"is_active"`
 	Netmask        types.Number `tfsdk:"netmask"`
 	Outbound       types.Int64  `tfsdk:"outbound"`
 	Port           types.Number `tfsdk:"port"`

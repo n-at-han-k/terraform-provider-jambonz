@@ -20,8 +20,10 @@ func SipGatewayResourceSchema(ctx context.Context) schema.Schema {
 				Required: true,
 			},
 			"is_active": schema.Int64Attribute{
-				Optional: true,
-				Computed: true,
+				Optional:            true,
+				Computed:            true,
+				Description:         "whether the gateway is active",
+				MarkdownDescription: "whether the gateway is active",
 			},
 			"netmask": schema.NumberAttribute{
 				Optional:            true,

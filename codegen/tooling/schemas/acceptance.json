@@ -1,0 +1,72 @@
+{
+  "$comment": [
+    "Fixtures for the generated acceptance tests: one entry per resource in the",
+    "IR, read by cmd/gen and rendered into internal/provider/<name>_resource_test.go.",
+    "",
+    "The generator knows the shape of every test -- create, import, update,",
+    "destroy -- because that shape is the same for every resource and follows",
+    "from the spec. What it cannot know is a value: that an ipv4 attribute wants",
+    "10.42.2.0 and not the empty string, that renaming is the cheap way to prove",
+    "an update round-trips. Those are stated here, once, the way the overlay",
+    "states the wire facts.",
+    "",
+    "JSON and not YAML because cmd/gen depends on nothing outside the standard",
+    "library, and that is worth more than the nicer quoting.",
+    "",
+    "The sids below are seeded by test/docker-compose.yml: the api-server's own",
+    "migration creates the default service provider and account, with these",
+    "fixed ids, before the tests run.",
+    "",
+    "`create` is deliberately the MINIMUM -- required attributes and nothing",
+    "else. That is not laziness, it is the point: an optional+computed attribute",
+    "left out of the configuration is planned as unknown, and an attribute still",
+    "unknown when apply returns is the failure these tests exist to catch.",
+    "Filling the block in would hide exactly the bug it is here to find.",
+    "",
+    "sip_gateway carries inbound and outbound even though the schema calls them",
+    "optional: the columns are NOT NULL with no default, so MySQL rejects a create",
+    "without them --",
+    "",
+    "    Field 'inbound' doesn't have a default value",
+    "",
+    "-- which the generated test found on its first run. is_active is still left",
+    "out, which is the point of the entry."
+  ],
+  "account": {
+    "create": "  name                 = \"tf-acc-account\"\n  service_provider_sid = \"2708b1b3-2736-40ea-b502-c53d8396247f\"\n",
+    "update": "  name                 = \"tf-acc-account-renamed\"\n  service_provider_sid = \"2708b1b3-2736-40ea-b502-c53d8396247f\"\n",
+    "changed": {
+      "name": "tf-acc-account-renamed"
+    }
+  },
+  "application": {
+    "create": "  name        = \"tf-acc-application\"\n  account_sid = \"9351f46a-678c-43f5-b8a6-d4eb58d131af\"\n  call_hook = {\n    url = \"http://example.com/call\"\n  }\n  call_status_hook = {\n    url = \"http://example.com/status\"\n  }\n",
+    "update": "  name        = \"tf-acc-application-renamed\"\n  account_sid = \"9351f46a-678c-43f5-b8a6-d4eb58d131af\"\n  call_hook = {\n    url = \"http://example.com/call\"\n  }\n  call_status_hook = {\n    url = \"http://example.com/status\"\n  }\n",
+    "changed": {
+      "name": "tf-acc-application-renamed"
+    }
+  },
+  "voip_carrier": {
+    "create": "  name = \"tf-acc-carrier\"\n",
+    "update": "  name = \"tf-acc-carrier-renamed\"\n",
+    "changed": {
+      "name": "tf-acc-carrier-renamed"
+    }
+  },
+  "sip_gateway": {
+    "prerequisites": "resource \"jambonz_voip_carrier\" \"acc\" {\n  name = \"tf-acc-carrier-for-gateway\"\n}\n",
+    "create": "  voip_carrier_sid = jambonz_voip_carrier.acc.voip_carrier_sid\n  ipv4             = \"10.42.2.0\"\n  inbound          = 1\n  outbound         = 1\n",
+    "update": "  voip_carrier_sid = jambonz_voip_carrier.acc.voip_carrier_sid\n  ipv4             = \"10.42.3.0\"\n  inbound          = 1\n  outbound         = 1\n",
+    "changed": {
+      "ipv4": "10.42.3.0"
+    }
+  },
+  "phone_number": {
+    "prerequisites": "resource \"jambonz_voip_carrier\" \"acc\" {\n  name = \"tf-acc-carrier-for-number\"\n}\n",
+    "create": "  number           = \"15551230001\"\n  voip_carrier_sid = jambonz_voip_carrier.acc.voip_carrier_sid\n",
+    "update": "  number           = \"15551230002\"\n  voip_carrier_sid = jambonz_voip_carrier.acc.voip_carrier_sid\n",
+    "changed": {
+      "number": "15551230002"
+    }
+  }
+}

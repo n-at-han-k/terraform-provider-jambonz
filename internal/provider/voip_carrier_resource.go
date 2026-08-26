@@ -265,8 +265,17 @@ func (r *voipCarrierResource) fetch(ctx context.Context, data *resource_voip_car
 	return true, !diags.HasError()
 }
 
-// apply copies the API representation onto the Terraform model. Computed
-// attributes are written unconditionally — that is what makes drift visible.
+// apply copies the API representation onto the Terraform model. Every attribute
+// the record carries is written unconditionally — that is what makes drift
+// visible, and it is also what settles the unknowns a create leaves behind.
+//
+// Secrets are not an exception, because this API does not treat them as one:
+// every read is `SELECT * from <table>`, so a password column comes back on
+// every read and comes back null when it was never set. Writing those back only
+// when non-nil — the usual defence against an API that discloses a secret once —
+// leaves an unconfigured secret unknown for ever, and Terraform ends the apply
+// with "provider returned invalid result object after apply". A column this API
+// always sends is read like any other column.
 func (r *voipCarrierResource) apply(ctx context.Context, data *resource_voip_carrier.VoipCarrierModel, p *jambonzapi.VoipCarrier, diags *diag.Diagnostics) {
 	if p == nil {
 		return
@@ -276,11 +285,13 @@ func (r *voipCarrierResource) apply(ctx context.Context, data *resource_voip_car
 	data.Description = types.StringPointerValue((*string)(p.Description))
 	data.Diversion = types.StringPointerValue((*string)(p.Diversion))
 	data.E164LeadingPlus = int64PointerValue(p.E164LeadingPlus)
+	data.InboundAuthPassword = types.StringPointerValue((*string)(p.InboundAuthPassword))
 	data.InboundAuthUsername = types.StringPointerValue((*string)(p.InboundAuthUsername))
 	data.IsActive = int64PointerValue(p.IsActive)
 	data.Name = types.StringValue(string(p.Name))
 	data.RegisterFromDomain = types.StringPointerValue((*string)(p.RegisterFromDomain))
 	data.RegisterFromUser = types.StringPointerValue((*string)(p.RegisterFromUser))
+	data.RegisterPassword = types.StringPointerValue((*string)(p.RegisterPassword))
 	data.RegisterPublicIpInContact = int64PointerValue(p.RegisterPublicIpInContact)
 	data.RegisterSipRealm = types.StringPointerValue((*string)(p.RegisterSipRealm))
 	data.RegisterUseTls = int64PointerValue(p.RegisterUseTls)
