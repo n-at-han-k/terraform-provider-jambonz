@@ -1057,6 +1057,8 @@ paths:
                   example: my US sip trunking provider
                 account_sid:
                   type: string
+                service_provider_sid:
+                  type: string
                 application_sid:
                   type: string
                 e164_leading_plus:
@@ -4968,6 +4970,9 @@ components:
         description:
           type: string
         account_sid:
+          type: string
+          format: uuid
+        service_provider_sid:
           type: string
           format: uuid
         application_sid:

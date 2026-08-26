@@ -95,6 +95,7 @@ func (r *voipCarrierResource) Create(ctx context.Context, req resource.CreateReq
 	setIntPtr(&body.RegisterUseTls, data.RegisterUseTls)
 	setStringPtr(&body.RegisterUsername, data.RegisterUsername)
 	setIntPtr(&body.RequiresRegister, data.RequiresRegister)
+	setStringPtr(&body.ServiceProviderSid, data.ServiceProviderSid)
 	setStringPtr(&body.TechPrefix, data.TechPrefix)
 
 	api, err := r.client.CreateVoipCarrierWithResponse(ctx, body)
@@ -187,6 +188,7 @@ func (r *voipCarrierResource) Update(ctx context.Context, req resource.UpdateReq
 	setIntPtr(&body.RegisterUseTls, plan.RegisterUseTls)
 	setStringPtr(&body.RegisterUsername, plan.RegisterUsername)
 	setIntPtr(&body.RequiresRegister, plan.RequiresRegister)
+	setUUIDPtr(&body.ServiceProviderSid, plan.ServiceProviderSid)
 	setStringPtr(&body.TechPrefix, plan.TechPrefix)
 
 	id := plan.VoipCarrierSid.ValueString()
@@ -297,6 +299,7 @@ func (r *voipCarrierResource) apply(ctx context.Context, data *resource_voip_car
 	data.RegisterUseTls = int64PointerValue(p.RegisterUseTls)
 	data.RegisterUsername = types.StringPointerValue((*string)(p.RegisterUsername))
 	data.RequiresRegister = int64PointerValue(p.RequiresRegister)
+	data.ServiceProviderSid = uuidPointerValue(p.ServiceProviderSid)
 	data.TechPrefix = types.StringPointerValue((*string)(p.TechPrefix))
 	data.VoipCarrierSid = uuidPointerValue(p.VoipCarrierSid)
 

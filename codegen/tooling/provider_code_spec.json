@@ -422,6 +422,12 @@
 						"name": "requires_register"
 					},
 					{
+						"name": "service_provider_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
 						"name": "tech_prefix",
 						"string": {
 							"computed_optional_required": "computed"
@@ -900,6 +906,12 @@
 							"description": "wehther this provider requires us to send a REGISTER to them in order to receive calls"
 						},
 						"name": "requires_register"
+					},
+					{
+						"name": "service_provider_sid",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
 					},
 					{
 						"name": "tech_prefix",

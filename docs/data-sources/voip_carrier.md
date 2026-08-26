@@ -44,4 +44,5 @@ data "jambonz_voip_carrier" "example" {
 - `register_use_tls` (Number) whether to REGISTER over TLS
 - `register_username` (String)
 - `requires_register` (Number)
+- `service_provider_sid` (String)
 - `tech_prefix` (String)

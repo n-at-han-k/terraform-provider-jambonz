@@ -107,6 +107,10 @@ func VoipCarrierResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "wehther this provider requires us to send a REGISTER to them in order to receive calls",
 				MarkdownDescription: "wehther this provider requires us to send a REGISTER to them in order to receive calls",
 			},
+			"service_provider_sid": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
 			"tech_prefix": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
@@ -138,6 +142,7 @@ type VoipCarrierModel struct {
 	RegisterUseTls            types.Int64  `tfsdk:"register_use_tls"`
 	RegisterUsername          types.String `tfsdk:"register_username"`
 	RequiresRegister          types.Int64  `tfsdk:"requires_register"`
+	ServiceProviderSid        types.String `tfsdk:"service_provider_sid"`
 	TechPrefix                types.String `tfsdk:"tech_prefix"`
 	VoipCarrierSid            types.String `tfsdk:"voip_carrier_sid"`
 }

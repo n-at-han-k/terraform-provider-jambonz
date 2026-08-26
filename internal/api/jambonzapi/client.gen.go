@@ -1438,11 +1438,12 @@ type VoipCarrier struct {
 	RegisterSipRealm          *string `json:"register_sip_realm,omitempty"`
 
 	// RegisterUseTls whether to REGISTER over TLS
-	RegisterUseTls   *int                `json:"register_use_tls,omitempty"`
-	RegisterUsername *string             `json:"register_username,omitempty"`
-	RequiresRegister *int                `json:"requires_register,omitempty"`
-	TechPrefix       *string             `json:"tech_prefix,omitempty"`
-	VoipCarrierSid   *openapi_types.UUID `json:"voip_carrier_sid,omitempty"`
+	RegisterUseTls     *int                `json:"register_use_tls,omitempty"`
+	RegisterUsername   *string             `json:"register_username,omitempty"`
+	RequiresRegister   *int                `json:"requires_register,omitempty"`
+	ServiceProviderSid *openapi_types.UUID `json:"service_provider_sid,omitempty"`
+	TechPrefix         *string             `json:"tech_prefix,omitempty"`
+	VoipCarrierSid     *openapi_types.UUID `json:"voip_carrier_sid,omitempty"`
 }
 
 // Webhook Example: {"method":"POST","url":"https://acme.com"}
@@ -2031,7 +2032,8 @@ type CreateVoipCarrierJSONBody struct {
 	RegisterUsername *string `json:"register_username,omitempty"`
 
 	// RequiresRegister wehther this provider requires us to send a REGISTER to them in order to receive calls
-	RequiresRegister *int `json:"requires_register,omitempty"`
+	RequiresRegister   *int    `json:"requires_register,omitempty"`
+	ServiceProviderSid *string `json:"service_provider_sid,omitempty"`
 
 	// TechPrefix prefix to be applied to the called number for outbound call attempts
 	TechPrefix *string `json:"tech_prefix,omitempty"`

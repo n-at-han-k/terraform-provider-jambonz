@@ -114,6 +114,7 @@ func (d *voipCarrierDataSource) apply(ctx context.Context, data *datasource_voip
 	data.RegisterUseTls = int64PointerValue(p.RegisterUseTls)
 	data.RegisterUsername = types.StringPointerValue((*string)(p.RegisterUsername))
 	data.RequiresRegister = int64PointerValue(p.RequiresRegister)
+	data.ServiceProviderSid = uuidPointerValue(p.ServiceProviderSid)
 	data.TechPrefix = types.StringPointerValue((*string)(p.TechPrefix))
 	_ = ctx
 	_ = diags

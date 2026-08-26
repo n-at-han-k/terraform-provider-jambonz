@@ -55,6 +55,7 @@ resource "jambonz_voip_carrier" "fastco" {
 - `register_use_tls` (Number) wehther this provider requires us to send a REGISTER use TLS protocol
 - `register_username` (String) sip username to authenticate with, if registration is required
 - `requires_register` (Number) wehther this provider requires us to send a REGISTER to them in order to receive calls
+- `service_provider_sid` (String)
 - `tech_prefix` (String) prefix to be applied to the called number for outbound call attempts
 
 ### Read-Only
