@@ -95,11 +95,6 @@ func (r *voipCarrierResource) Create(ctx context.Context, req resource.CreateReq
 	setBoolPtr(&body.RegisterUseTls, data.RegisterUseTls)
 	setStringPtr(&body.RegisterUsername, data.RegisterUsername)
 	setBoolPtr(&body.RequiresRegister, data.RequiresRegister)
-	setFloatPtr(&body.SmppEnquireLinkInterval, data.SmppEnquireLinkInterval)
-	setStringPtr(&body.SmppInboundPassword, data.SmppInboundPassword)
-	setStringPtr(&body.SmppInboundSystemId, data.SmppInboundSystemId)
-	setStringPtr(&body.SmppPassword, data.SmppPassword)
-	setStringPtr(&body.SmppSystemId, data.SmppSystemId)
 	setStringPtr(&body.TechPrefix, data.TechPrefix)
 
 	api, err := r.client.CreateVoipCarrierWithResponse(ctx, body)
@@ -192,11 +187,6 @@ func (r *voipCarrierResource) Update(ctx context.Context, req resource.UpdateReq
 	setBoolPtr(&body.RegisterUseTls, plan.RegisterUseTls)
 	setStringPtr(&body.RegisterUsername, plan.RegisterUsername)
 	setBoolPtr(&body.RequiresRegister, plan.RequiresRegister)
-	setFloatPtr(&body.SmppEnquireLinkInterval, plan.SmppEnquireLinkInterval)
-	setStringPtr(&body.SmppInboundPassword, plan.SmppInboundPassword)
-	setStringPtr(&body.SmppInboundSystemId, plan.SmppInboundSystemId)
-	setStringPtr(&body.SmppPassword, plan.SmppPassword)
-	setStringPtr(&body.SmppSystemId, plan.SmppSystemId)
 	setStringPtr(&body.TechPrefix, plan.TechPrefix)
 
 	id := plan.VoipCarrierSid.ValueString()
@@ -296,9 +286,6 @@ func (r *voipCarrierResource) apply(ctx context.Context, data *resource_voip_car
 	data.RegisterUseTls = types.BoolPointerValue((*bool)(p.RegisterUseTls))
 	data.RegisterUsername = types.StringPointerValue((*string)(p.RegisterUsername))
 	data.RequiresRegister = types.BoolPointerValue((*bool)(p.RequiresRegister))
-	data.SmppEnquireLinkInterval = floatPointerValue(p.SmppEnquireLinkInterval)
-	data.SmppInboundSystemId = types.StringPointerValue((*string)(p.SmppInboundSystemId))
-	data.SmppSystemId = types.StringPointerValue((*string)(p.SmppSystemId))
 	data.TechPrefix = types.StringPointerValue((*string)(p.TechPrefix))
 	data.VoipCarrierSid = uuidPointerValue(p.VoipCarrierSid)
 
@@ -314,20 +301,6 @@ func (r *voipCarrierResource) apply(ctx context.Context, data *resource_voip_car
 	// forever — so it is only written when the server actually sent one.
 	if p.RegisterPassword != nil {
 		data.RegisterPassword = types.StringPointerValue((*string)(p.RegisterPassword))
-	}
-
-	// smpp_inbound_password is sensitive. An API that returns a secret once, at create, omits
-	// it on every subsequent read; overwriting with null would show a spurious diff
-	// forever — so it is only written when the server actually sent one.
-	if p.SmppInboundPassword != nil {
-		data.SmppInboundPassword = types.StringPointerValue((*string)(p.SmppInboundPassword))
-	}
-
-	// smpp_password is sensitive. An API that returns a secret once, at create, omits
-	// it on every subsequent read; overwriting with null would show a spurious diff
-	// forever — so it is only written when the server actually sent one.
-	if p.SmppPassword != nil {
-		data.SmppPassword = types.StringPointerValue((*string)(p.SmppPassword))
 	}
 	_ = ctx
 	_ = diags

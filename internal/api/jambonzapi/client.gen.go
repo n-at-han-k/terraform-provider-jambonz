@@ -42,24 +42,6 @@ func (e AlertAlertType) Valid() bool {
 	}
 }
 
-// Defines values for ApplicationRecordAllCalls.
-const (
-	ApplicationRecordAllCallsN0 ApplicationRecordAllCalls = 0
-	ApplicationRecordAllCallsN1 ApplicationRecordAllCalls = 1
-)
-
-// Valid indicates whether the value is a known member of the ApplicationRecordAllCalls enum.
-func (e ApplicationRecordAllCalls) Valid() bool {
-	switch e {
-	case ApplicationRecordAllCallsN0:
-		return true
-	case ApplicationRecordAllCallsN1:
-		return true
-	default:
-		return false
-	}
-}
-
 // Defines values for CallCallStatus.
 const (
 	CallCallStatusAlerting   CallCallStatus = "alerting"
@@ -311,16 +293,16 @@ func (e UserProfileScope) Valid() bool {
 
 // Defines values for WebhookMethod.
 const (
-	WebhookMethodGET  WebhookMethod = "GET"
-	WebhookMethodPOST WebhookMethod = "POST"
+	WebhookMethodGet  WebhookMethod = "get"
+	WebhookMethodPost WebhookMethod = "post"
 )
 
 // Valid indicates whether the value is a known member of the WebhookMethod enum.
 func (e WebhookMethod) Valid() bool {
 	switch e {
-	case WebhookMethodGET:
+	case WebhookMethodGet:
 		return true
-	case WebhookMethodPOST:
+	case WebhookMethodPost:
 		return true
 	default:
 		return false
@@ -630,42 +612,6 @@ func (e ValidateActivationCodeJSONBodyType) Valid() bool {
 	}
 }
 
-// Defines values for CreateApplicationJSONBodyRecordAllCalls.
-const (
-	CreateApplicationJSONBodyRecordAllCallsN0 CreateApplicationJSONBodyRecordAllCalls = 0
-	CreateApplicationJSONBodyRecordAllCallsN1 CreateApplicationJSONBodyRecordAllCalls = 1
-)
-
-// Valid indicates whether the value is a known member of the CreateApplicationJSONBodyRecordAllCalls enum.
-func (e CreateApplicationJSONBodyRecordAllCalls) Valid() bool {
-	switch e {
-	case CreateApplicationJSONBodyRecordAllCallsN0:
-		return true
-	case CreateApplicationJSONBodyRecordAllCallsN1:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for UpdateApplicationJSONBodyRecordAllCalls.
-const (
-	UpdateApplicationJSONBodyRecordAllCallsN0 UpdateApplicationJSONBodyRecordAllCalls = 0
-	UpdateApplicationJSONBodyRecordAllCallsN1 UpdateApplicationJSONBodyRecordAllCalls = 1
-)
-
-// Valid indicates whether the value is a known member of the UpdateApplicationJSONBodyRecordAllCalls enum.
-func (e UpdateApplicationJSONBodyRecordAllCalls) Valid() bool {
-	switch e {
-	case UpdateApplicationJSONBodyRecordAllCallsN0:
-		return true
-	case UpdateApplicationJSONBodyRecordAllCallsN1:
-		return true
-	default:
-		return false
-	}
-}
-
 // Defines values for CheckAvailabilityParamsType.
 const (
 	CheckAvailabilityParamsTypeEmail     CheckAvailabilityParamsType = "email"
@@ -854,9 +800,11 @@ type Account struct {
 	AccountSid                  *openapi_types.UUID `json:"account_sid,omitempty"`
 	DeviceCallingApplicationSid *openapi_types.UUID `json:"device_calling_application_sid,omitempty"`
 	Name                        string              `json:"name"`
-	RegistrationHook            *Webhook            `json:"registration_hook,omitempty"`
-	ServiceProviderSid          openapi_types.UUID  `json:"service_provider_sid"`
-	SipRealm                    *string             `json:"sip_realm,omitempty"`
+
+	// RegistrationHook Example: {"method":"POST","url":"https://acme.com"}
+	RegistrationHook   *Webhook           `json:"registration_hook,omitempty"`
+	ServiceProviderSid openapi_types.UUID `json:"service_provider_sid"`
+	SipRealm           *string            `json:"sip_realm,omitempty"`
 }
 
 // Alert defines model for Alert.
@@ -889,20 +837,17 @@ type Application struct {
 	AccountSid     openapi_types.UUID  `json:"account_sid"`
 	ApplicationSid *openapi_types.UUID `json:"application_sid,omitempty"`
 
-	// CallHook application webhook for inbound voice calls
-	CallHook Webhook `json:"call_hook"`
+	// CallHook Example: {"method":"POST","url":"https://acme.com"}
+	CallHook *Webhook `json:"call_hook,omitempty"`
 
-	// CallStatusHook webhook for reporting call status events
-	CallStatusHook Webhook `json:"call_status_hook"`
-
-	// MessagingHook application webhook for inbound SMS/MMS
-	MessagingHook  Webhook                   `json:"messaging_hook"`
-	Name           string                    `json:"name"`
-	RecordAllCalls ApplicationRecordAllCalls `json:"record_all_calls"`
+	// CallStatusHook Example: {"method":"POST","url":"https://acme.com"}
+	CallStatusHook           *Webhook `json:"call_status_hook,omitempty"`
+	Name                     string   `json:"name"`
+	SpeechRecognizerLanguage *string  `json:"speech_recognizer_language,omitempty"`
+	SpeechRecognizerVendor   *string  `json:"speech_recognizer_vendor,omitempty"`
+	SpeechSynthesisVendor    *string  `json:"speech_synthesis_vendor,omitempty"`
+	SpeechSynthesisVoice     *string  `json:"speech_synthesis_voice,omitempty"`
 }
-
-// ApplicationRecordAllCalls defines model for Application.RecordAllCalls.
-type ApplicationRecordAllCalls int
 
 // Call defines model for Call.
 type Call struct {
@@ -946,66 +891,103 @@ type Charge struct {
 // ChargeBilledActivity defines model for Charge.BilledActivity.
 type ChargeBilledActivity string
 
-// GeneralError defines model for GeneralError.
+// GeneralError Example: {"msg":"specific error detail will be provided here"}
 type GeneralError struct {
 	Msg string `json:"msg"`
 }
 
 // GoogleCustomVoice defines model for GoogleCustomVoice.
 type GoogleCustomVoice struct {
-	Model               string `json:"model"`
-	Name                string `json:"name"`
-	ReportedUsage       string `json:"reported_usage"`
+	// Model Example: projects/12412312/locations/global/models/2134124123-2dbf-43be-9593-12314123
+	Model string `json:"model"`
+
+	// Name Example: Sally
+	Name string `json:"name"`
+
+	// ReportedUsage Example: REALTIME
+	ReportedUsage string `json:"reported_usage"`
+
+	// SpeechCredentialSid Example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
 	SpeechCredentialSid string `json:"speech_credential_sid"`
 }
 
 // LanguageVoice defines model for LanguageVoice.
 type LanguageVoice struct {
-	Name  *string `json:"name,omitempty"`
+	// Name Example: Standard-A (Female)
+	Name *string `json:"name,omitempty"`
+
+	// Value Example: ar-XA-Standard-A
 	Value *string `json:"value,omitempty"`
 }
 
 // LanguageVoices defines model for LanguageVoices.
 type LanguageVoices struct {
-	Name   *string          `json:"name,omitempty"`
+	// Name Example: English (US)
+	Name *string `json:"name,omitempty"`
+
+	// Value Example: en-US
 	Value  *string          `json:"value,omitempty"`
 	Voices *[]LanguageVoice `json:"voices,omitempty"`
 }
 
 // Lcr defines model for Lcr.
 type Lcr struct {
+	// DefaultCarrierSetEntrySid Example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
 	DefaultCarrierSetEntrySid *string `json:"default_carrier_set_entry_sid,omitempty"`
-	Name                      string  `json:"name"`
+
+	// Name Example: twilioLcr
+	Name string `json:"name"`
 }
 
 // LcrCarrierSetEntry defines model for LcrCarrierSetEntry.
 type LcrCarrierSetEntry struct {
-	LcrRouteSid    string  `json:"lcr_route_sid"`
-	Priority       float32 `json:"priority"`
-	VoipCarrierSid string  `json:"voip_carrier_sid"`
+	// LcrRouteSid Example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+	LcrRouteSid string `json:"lcr_route_sid"`
+
+	// Priority Example: 1
+	Priority float32 `json:"priority"`
+
+	// VoipCarrierSid Example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+	VoipCarrierSid string `json:"voip_carrier_sid"`
 
 	// Workload traffic distribution value
+	//
+	// Example: 90
 	Workload *float32 `json:"workload,omitempty"`
 }
 
 // LcrRoute defines model for LcrRoute.
 type LcrRoute struct {
+	// Description Example: this is example description
 	Description *string `json:"description,omitempty"`
-	LcrSid      string  `json:"lcr_sid"`
-	Priority    float32 `json:"priority"`
+
+	// LcrSid Example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+	LcrSid string `json:"lcr_sid"`
+
+	// Priority Example: 1
+	Priority float32 `json:"priority"`
 
 	// Regex out going call Phone number regex
+	//
+	// Example: 1*
 	Regex string `json:"regex"`
 }
 
 // LcrRouteAndCarrierEntries defines model for LcrRouteAndCarrierEntries.
 type LcrRouteAndCarrierEntries struct {
+	// Description Example: this is example description
 	Description          *string               `json:"description,omitempty"`
 	LcrCarrierSetEntries *[]LcrCarrierSetEntry `json:"lcr_carrier_set_entries,omitempty"`
-	LcrSid               string                `json:"lcr_sid"`
-	Priority             float32               `json:"priority"`
+
+	// LcrSid Example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+	LcrSid string `json:"lcr_sid"`
+
+	// Priority Example: 1
+	Priority float32 `json:"priority"`
 
 	// Regex out going call Phone number regex
+	//
+	// Example: 1*
 	Regex string `json:"regex"`
 }
 
@@ -1026,7 +1008,7 @@ type Login struct {
 	Username string `json:"username"`
 }
 
-// Message defines model for Message.
+// Message Example: {"from":"13394445678","text":"please call when you can","to":"16173333456"}
 type Message struct {
 	From     string  `json:"from"`
 	Media    *string `json:"media,omitempty"`
@@ -1105,14 +1087,27 @@ type RecentCallsDirection string
 
 // RegisteredClient defines model for RegisteredClient.
 type RegisteredClient struct {
-	AllowDirectAppCalling   *float32                          `json:"allow_direct_app_calling,omitempty"`
-	AllowDirectQueueCalling *float32                          `json:"allow_direct_queue_calling,omitempty"`
-	AllowDirectUserCalling  *float32                          `json:"allow_direct_user_calling,omitempty"`
-	Contact                 *string                           `json:"contact,omitempty"`
-	ExpiryTime              *float32                          `json:"expiryTime,omitempty"`
-	Name                    string                            `json:"name"`
-	Protocol                *string                           `json:"protocol,omitempty"`
-	RegisteredStatus        *RegisteredClientRegisteredStatus `json:"registered_status,omitempty"`
+	// AllowDirectAppCalling Example: 1
+	AllowDirectAppCalling *float32 `json:"allow_direct_app_calling,omitempty"`
+
+	// AllowDirectQueueCalling Example: 1
+	AllowDirectQueueCalling *float32 `json:"allow_direct_queue_calling,omitempty"`
+
+	// AllowDirectUserCalling Example: 1
+	AllowDirectUserCalling *float32 `json:"allow_direct_user_calling,omitempty"`
+
+	// Contact Example: sip:0dluqjt6@od41sl9jfc9m.invalid;transport=ws
+	Contact *string `json:"contact,omitempty"`
+
+	// ExpiryTime Example: 1698981449173
+	ExpiryTime *float32 `json:"expiryTime,omitempty"`
+
+	// Name Example: xhoaluu
+	Name string `json:"name"`
+
+	// Protocol Example: wss
+	Protocol         *string                           `json:"protocol,omitempty"`
+	RegisteredStatus *RegisteredClientRegisteredStatus `json:"registered_status,omitempty"`
 }
 
 // RegisteredClientRegisteredStatus defines model for RegisteredClient.RegisteredStatus.
@@ -1133,7 +1128,7 @@ type ServiceProvider struct {
 	MsTeamsFqdn *string `json:"ms_teams_fqdn,omitempty"`
 	Name        string  `json:"name"`
 
-	// RegistrationHook authentication webhook for registration
+	// RegistrationHook Example: {"method":"POST","url":"https://acme.com"}
 	RegistrationHook   *Webhook           `json:"registration_hook,omitempty"`
 	RootDomain         *string            `json:"root_domain,omitempty"`
 	ServiceProviderSid openapi_types.UUID `json:"service_provider_sid"`
@@ -1157,19 +1152,6 @@ type SipGateway struct {
 	Port           float32             `json:"port"`
 	SipGatewaySid  *openapi_types.UUID `json:"sip_gateway_sid,omitempty"`
 	VoipCarrierSid openapi_types.UUID  `json:"voip_carrier_sid"`
-}
-
-// SmppGateway defines model for SmppGateway.
-type SmppGateway struct {
-	Inbound        *bool              `json:"inbound,omitempty"`
-	Ipv4           string             `json:"ipv4"`
-	IsPrimary      *bool              `json:"is_primary,omitempty"`
-	Netmask        float32            `json:"netmask"`
-	Outbound       *bool              `json:"outbound,omitempty"`
-	Port           float32            `json:"port"`
-	SmppGatewaySid openapi_types.UUID `json:"smpp_gateway_sid"`
-	UseTls         *bool              `json:"use_tls,omitempty"`
-	VoipCarrierSid openapi_types.UUID `json:"voip_carrier_sid"`
 }
 
 // SpeechCredential defines model for SpeechCredential.
@@ -1206,12 +1188,12 @@ type SpeechLanguagesVoices struct {
 	TtsModel *[]TtsModel       `json:"ttsModel,omitempty"`
 }
 
-// SuccessfulAdd defines model for SuccessfulAdd.
+// SuccessfulAdd Example: {"sid":"9d26a637-1679-471f-8da8-7150266e1254"}
 type SuccessfulAdd struct {
 	Sid string `json:"sid"`
 }
 
-// SuccessfulApiKeyAdd defines model for SuccessfulApiKeyAdd.
+// SuccessfulApiKeyAdd Example: {"sid":"9d26a637-1679-471f-8da8-7150266e1254","token":"589cead6-de24-4689-8ac3-08ffaf102811"}
 type SuccessfulApiKeyAdd struct {
 	Sid   string `json:"sid"`
 	Token string `json:"token"`
@@ -1225,7 +1207,7 @@ type SuccessfulLogin struct {
 	UserSid     *string `json:"user_sid,omitempty"`
 }
 
-// Target defines model for Target.
+// Target Example: {"number":"+16172375080","type":"phone"}
 type Target struct {
 	Auth *struct {
 		Password *string `json:"password,omitempty"`
@@ -1250,7 +1232,10 @@ type TargetType string
 
 // TtsModel defines model for TtsModel.
 type TtsModel struct {
-	Name  *string `json:"name,omitempty"`
+	// Name Example: Turbo v2
+	Name *string `json:"name,omitempty"`
+
+	// Value Example: eleven_turbo_v2
 	Value *string `json:"value,omitempty"`
 }
 
@@ -1299,7 +1284,6 @@ type UserAndAccountDetail struct {
 		ApplicationSid           *string `json:"application_sid,omitempty"`
 		CallHookSid              *string `json:"call_hook_sid,omitempty"`
 		CallStatusHookSid        *string `json:"call_status_hook_sid,omitempty"`
-		MessagingHookSid         *string `json:"messaging_hook_sid,omitempty"`
 		Name                     *string `json:"name,omitempty"`
 		ServiceProviderSid       *string `json:"service_provider_sid,omitempty"`
 		SpeechRecognizerLanguage *string `json:"speech_recognizer_language,omitempty"`
@@ -1338,47 +1322,72 @@ type UserList struct {
 
 // UserProfile defines model for UserProfile.
 type UserProfile struct {
+	// AccountSid Example: a5bce31e-a028-45cd-94c4-f121b72fec61
 	AccountSid *string `json:"account_sid,omitempty"`
 
 	// Email email associated with user
+	//
+	// Example: daveh@drachtio.org
 	Email string `json:"email"`
 
 	// EmailValidated indicates whether user has validated their email address
+	//
+	// Example: true
 	EmailValidated *bool `json:"email_validated,omitempty"`
 
 	// IsActive indicates whether account is active
+	//
+	// Example: true
 	IsActive bool `json:"is_active"`
 
 	// Jwt json web token to be used as bearer token in API requests
 	Jwt string `json:"jwt"`
 
 	// Name full user name
+	//
+	// Example: Dave Horton
 	Name string `json:"name"`
 
 	// Phone phone associated with user
 	Phone *string `json:"phone,omitempty"`
 
 	// PhoneValidated indicates whether user has validated their mobile phone
+	//
+	// Example: true
 	PhoneValidated *bool `json:"phone_validated,omitempty"`
 
 	// Pristine true if account was newly created
+	//
+	// Example: true
 	Pristine bool `json:"pristine"`
 
 	// Provider authentication provider
+	//
+	// Example: github
 	Provider UserProfileProvider `json:"provider"`
 
 	// Scope scope of user permissions
+	//
+	// Example: read-write
 	Scope UserProfileScope `json:"scope"`
 
 	// TutorialCompletion bitmask indicating which tutorials have been completed
+	//
+	// Example: 1
 	TutorialCompletion *float32 `json:"tutorial_completion,omitempty"`
-	UserSid            string   `json:"user_sid"`
+
+	// UserSid Example: a5bce31e-a028-45cd-94c4-f121b72fec61
+	UserSid string `json:"user_sid"`
 }
 
 // UserProfileProvider authentication provider
+//
+// Example: github
 type UserProfileProvider string
 
 // UserProfileScope scope of user permissions
+//
+// Example: read-write
 type UserProfileScope string
 
 // VoipCarrier defines model for VoipCarrier.
@@ -1405,24 +1414,19 @@ type VoipCarrier struct {
 	RegisterSipRealm          *string `json:"register_sip_realm,omitempty"`
 
 	// RegisterUseTls whether to REGISTER over TLS
-	RegisterUseTls          *bool               `json:"register_use_tls,omitempty"`
-	RegisterUsername        *string             `json:"register_username,omitempty"`
-	RequiresRegister        *bool               `json:"requires_register,omitempty"`
-	SmppEnquireLinkInterval *float32            `json:"smpp_enquire_link_interval,omitempty"`
-	SmppInboundPassword     *string             `json:"smpp_inbound_password,omitempty"`
-	SmppInboundSystemId     *string             `json:"smpp_inbound_system_id,omitempty"`
-	SmppPassword            *string             `json:"smpp_password,omitempty"`
-	SmppSystemId            *string             `json:"smpp_system_id,omitempty"`
-	TechPrefix              *string             `json:"tech_prefix,omitempty"`
-	VoipCarrierSid          *openapi_types.UUID `json:"voip_carrier_sid,omitempty"`
+	RegisterUseTls   *bool               `json:"register_use_tls,omitempty"`
+	RegisterUsername *string             `json:"register_username,omitempty"`
+	RequiresRegister *bool               `json:"requires_register,omitempty"`
+	TechPrefix       *string             `json:"tech_prefix,omitempty"`
+	VoipCarrierSid   *openapi_types.UUID `json:"voip_carrier_sid,omitempty"`
 }
 
-// Webhook defines model for Webhook.
+// Webhook Example: {"method":"POST","url":"https://acme.com"}
 type Webhook struct {
-	Method     WebhookMethod       `json:"method"`
-	Password   string              `json:"password"`
+	Method     *WebhookMethod      `json:"method,omitempty"`
+	Password   *string             `json:"password,omitempty"`
 	Url        string              `json:"url"`
-	Username   string              `json:"username"`
+	Username   *string             `json:"username,omitempty"`
 	WebhookSid *openapi_types.UUID `json:"webhook_sid,omitempty"`
 }
 
@@ -1434,13 +1438,19 @@ type CreateAccountJSONBody struct {
 	DeviceCallingApplicationSid *openapi_types.UUID `json:"device_calling_application_sid,omitempty"`
 
 	// Name account name
+	//
+	// Example: foobar
 	Name string `json:"name"`
 
-	// RegistrationHook authentication webhook for registration
-	RegistrationHook   *Webhook           `json:"registration_hook,omitempty"`
+	// RegistrationHook Example: {"method":"POST","url":"https://acme.com"}
+	RegistrationHook *Webhook `json:"registration_hook,omitempty"`
+
+	// ServiceProviderSid Example: 85f9c036-ba61-4f28-b2f5-617c23fa68ff
 	ServiceProviderSid openapi_types.UUID `json:"service_provider_sid"`
 
 	// SipRealm sip realm for registration
+	//
+	// Example: sip.mycompany.com
 	SipRealm *string `json:"sip_realm,omitempty"`
 }
 
@@ -1478,42 +1488,65 @@ type ListCallsParamsCallStatus string
 // CreateCallJSONBody defines parameters for CreateCall.
 type CreateCallJSONBody struct {
 	// AnswerOnBridge If set to true, the inbound call will ring until the number that was dialed answers the call, and at that point a 200 OK will be sent on the inbound leg.  If false, the inbound call will be answered immediately as the outbound call is placed.
+	//
+	// Example: false
 	AnswerOnBridge *bool `json:"answerOnBridge,omitempty"`
 
 	// ApplicationSid The application to use to control this call.  Either applicationSid or url is required.
 	ApplicationSid *openapi_types.UUID `json:"application_sid,omitempty"`
-	CallHook       *Webhook            `json:"call_hook,omitempty"`
-	CallStatusHook *Webhook            `json:"call_status_hook,omitempty"`
+
+	// CallHook Example: {"method":"POST","url":"https://acme.com"}
+	CallHook *Webhook `json:"call_hook,omitempty"`
+
+	// CallStatusHook Example: {"method":"POST","url":"https://acme.com"}
+	CallStatusHook *Webhook `json:"call_status_hook,omitempty"`
 
 	// From The calling party number
+	//
+	// Example: 16172375089
 	From string `json:"from"`
 
 	// FromHost The hostname to put in the SIP From header of the INVITE
+	//
+	// Example: blf.finotel.com
 	FromHost *string `json:"fromHost,omitempty"`
 
 	// Headers The customer SIP headers to associate with the call
+	//
+	// Example: {"X-Custom-Header":"Hello"}
 	Headers *map[string]interface{} `json:"headers,omitempty"`
 
 	// SipRequestWithinDialogHook The sip indialog hook to receive session messages
+	//
+	// Example: /customHook
 	SipRequestWithinDialogHook *string `json:"sipRequestWithinDialogHook,omitempty"`
 
 	// Tag Initial set of customer-supplied metadata to associate with the call (see jambonz 'tag' verb)
+	//
+	// Example: {"callCount":10}
 	Tag *map[string]interface{} `json:"tag,omitempty"`
 
 	// TimeLimit The max length of call in seconds
+	//
+	// Example: 60
 	TimeLimit *int `json:"timeLimit,omitempty"`
 
 	// Timeout The number of seconds to wait for call to be answered.  Defaults to 60.
+	//
+	// Example: 30
 	Timeout *int `json:"timeout,omitempty"`
 
-	// To Destination for call
+	// To Example: {"number":"+16172375080","type":"phone"}
 	To Target `json:"to"`
 }
 
 // UpdateCallJSONBody defines parameters for UpdateCall.
 type UpdateCallJSONBody struct {
-	CallHook                    *Webhook                          `json:"call_hook,omitempty"`
-	CallStatus                  *UpdateCallJSONBodyCallStatus     `json:"call_status,omitempty"`
+	// CallHook Example: {"method":"POST","url":"https://acme.com"}
+	CallHook   *Webhook                      `json:"call_hook,omitempty"`
+	CallStatus *UpdateCallJSONBodyCallStatus `json:"call_status,omitempty"`
+
+	// ChildCallHook Example: {"method":"POST","url":"https://acme.com"}
 	ChildCallHook               *Webhook                          `json:"child_call_hook,omitempty"`
 	ConfHoldStatus              *UpdateCallJSONBodyConfHoldStatus `json:"conf_hold_status,omitempty"`
 	ConfMuteStatus              *UpdateCallJSONBodyConfMuteStatus `json:"conf_mute_status,omitempty"`
@@ -1534,6 +1567,8 @@ type UpdateCallJSONBody struct {
 		Headers     *map[string]interface{} `json:"headers,omitempty"`
 		Method      *string                 `json:"method,omitempty"`
 	} `json:"sip_request,omitempty"`
+
+	// Whisper Example: {"method":"POST","url":"https://acme.com"}
 	Whisper *Webhook `json:"whisper,omitempty"`
 }
 
@@ -1570,7 +1605,7 @@ type ListRecentCallsParams struct {
 	Days      *float32   `form:"days,omitempty" json:"days,omitempty"`
 	Start     *time.Time `form:"start,omitempty" json:"start,omitempty"`
 	End       *time.Time `form:"end,omitempty" json:"end,omitempty"`
-	Answered  *bool      `form:"answered,omitempty" json:"answered,omitempty"`
+	Answered  *string    `form:"answered,omitempty" json:"answered,omitempty"`
 	Direction *string    `form:"direction,omitempty" json:"direction,omitempty"`
 
 	// Filter Filter value can be caller ID, callee ID or call Sid
@@ -1598,18 +1633,28 @@ type TestSpeechCredentialByAccount200JSONResponseBodyTtsStatus string
 // SynthesizeJSONBody defines parameters for Synthesize.
 type SynthesizeJSONBody struct {
 	// EncodingMp3 convert audio to mp3.
+	//
+	// Example: true
 	EncodingMp3 *bool `json:"encodingMp3,omitempty"`
 
 	// Language language is used in text
+	//
+	// Example: en-US
 	Language string `json:"language"`
 
 	// SpeechCredentialSid Speech credential Sid
+	//
+	// Example: 553b4b6b-8918-4394-a46d-1e3c5a3c717b
 	SpeechCredentialSid string `json:"speech_credential_sid"`
 
 	// Text the text to convert to audio
+	//
+	// Example: Hello How are you
 	Text string `json:"text"`
 
 	// Voice voice ID
+	//
+	// Example: en-US-Standard-C
 	Voice string `json:"voice"`
 }
 
@@ -1621,6 +1666,8 @@ type GetWebhookSecretParams struct {
 // SendActivationCodeJSONBody defines parameters for SendActivationCode.
 type SendActivationCodeJSONBody struct {
 	// Code activation code
+	//
+	// Example: A74DF
 	Code *string                         `json:"code,omitempty"`
 	Type *SendActivationCodeJSONBodyType `json:"type,omitempty"`
 
@@ -1661,41 +1708,22 @@ type CreateApikeyJSONBody struct {
 type CreateApplicationJSONBody struct {
 	AccountSid openapi_types.UUID `json:"account_sid"`
 
-	// CallHook application webhook to handle inbound voice calls
+	// AppJson Voice Application Json, call_hook will not be invoked if app_json is provided
+	AppJson *string `json:"app_json,omitempty"`
+
+	// CallHook Example: {"method":"POST","url":"https://acme.com"}
 	CallHook Webhook `json:"call_hook"`
 
-	// CallStatusHook webhook to report call status events
+	// CallStatusHook Example: {"method":"POST","url":"https://acme.com"}
 	CallStatusHook Webhook `json:"call_status_hook"`
-
-	// MessagingHook application webhook to handle inbound SMS/MMS messages
-	MessagingHook Webhook `json:"messaging_hook"`
 
 	// Name application name
-	Name           string                                  `json:"name"`
-	RecordAllCalls CreateApplicationJSONBodyRecordAllCalls `json:"record_all_calls"`
+	Name                     string  `json:"name"`
+	SpeechRecognizerLanguage *string `json:"speech_recognizer_language,omitempty"`
+	SpeechRecognizerVendor   *string `json:"speech_recognizer_vendor,omitempty"`
+	SpeechSynthesisVendor    *string `json:"speech_synthesis_vendor,omitempty"`
+	SpeechSynthesisVoice     *string `json:"speech_synthesis_voice,omitempty"`
 }
-
-// CreateApplicationJSONBodyRecordAllCalls defines parameters for CreateApplication.
-type CreateApplicationJSONBodyRecordAllCalls int
-
-// UpdateApplicationJSONBody defines parameters for UpdateApplication.
-type UpdateApplicationJSONBody struct {
-	AccountSid openapi_types.UUID `json:"account_sid"`
-
-	// CallHook application webhook for inbound voice calls
-	CallHook Webhook `json:"call_hook"`
-
-	// CallStatusHook webhook for reporting call status events
-	CallStatusHook Webhook `json:"call_status_hook"`
-
-	// MessagingHook application webhook for inbound SMS/MMS
-	MessagingHook  Webhook                                 `json:"messaging_hook"`
-	Name           string                                  `json:"name"`
-	RecordAllCalls UpdateApplicationJSONBodyRecordAllCalls `json:"record_all_calls"`
-}
-
-// UpdateApplicationJSONBodyRecordAllCalls defines parameters for UpdateApplication.
-type UpdateApplicationJSONBodyRecordAllCalls int
 
 // CheckAvailabilityParams defines parameters for CheckAvailability.
 type CheckAvailabilityParams struct {
@@ -1738,31 +1766,34 @@ type CreateLcrRoutesJSONBody = []LcrRoute
 // CreateLcrJSONBody defines parameters for CreateLcr.
 type CreateLcrJSONBody struct {
 	// Name name or Least Cost Routing
+	//
+	// Example: twilioLcr
 	Name string `json:"name"`
 }
 
 // CreateMsTeamsTenantJSONBody defines parameters for CreateMsTeamsTenant.
 type CreateMsTeamsTenantJSONBody struct {
-	AccountSid         *openapi_types.UUID `json:"account_sid,omitempty"`
-	ApplicationSid     *openapi_types.UUID `json:"application_sid,omitempty"`
-	ServiceProviderSid openapi_types.UUID  `json:"service_provider_sid"`
-	TenantFqdn         string              `json:"tenant_fqdn"`
+	// AccountSid Example: 85f9c036-ba61-4f28-b2f5-617c23fa68ff
+	AccountSid *openapi_types.UUID `json:"account_sid,omitempty"`
+
+	// ApplicationSid Example: 85f9c036-ba61-4f28-b2f5-617c23fa68ff
+	ApplicationSid *openapi_types.UUID `json:"application_sid,omitempty"`
+
+	// ServiceProviderSid Example: 85f9c036-ba61-4f28-b2f5-617c23fa68ff
+	ServiceProviderSid openapi_types.UUID `json:"service_provider_sid"`
+
+	// TenantFqdn Example: customer.contoso.com
+	TenantFqdn string `json:"tenant_fqdn"`
 }
 
 // CreatePhoneNumberJSONBody defines parameters for CreatePhoneNumber.
 type CreatePhoneNumberJSONBody struct {
-	AccountSid     openapi_types.UUID  `json:"account_sid"`
+	AccountSid     *openapi_types.UUID `json:"account_sid,omitempty"`
 	ApplicationSid *openapi_types.UUID `json:"application_sid,omitempty"`
 
 	// Number telephone number
 	Number         string             `json:"number"`
 	VoipCarrierSid openapi_types.UUID `json:"voip_carrier_sid"`
-}
-
-// UpdatePhoneNumberJSONBody defines parameters for UpdatePhoneNumber.
-type UpdatePhoneNumberJSONBody struct {
-	AccountSid     openapi_types.UUID `json:"account_sid"`
-	ApplicationSid openapi_types.UUID `json:"application_sid"`
 }
 
 // ListSbcsParams defines parameters for ListSbcs.
@@ -1784,15 +1815,21 @@ type CreateServiceProviderJSONBody struct {
 	Description *string `json:"description,omitempty"`
 
 	// MsTeamsFqdn SBC domain name for Microsoft Teams
+	//
+	// Example: contoso.com
 	MsTeamsFqdn *string `json:"ms_teams_fqdn,omitempty"`
 
 	// Name service provider name
+	//
+	// Example: fastcomms
 	Name string `json:"name"`
 
-	// RegistrationHook authentication webhook for registration
+	// RegistrationHook Example: {"method":"POST","url":"https://acme.com"}
 	RegistrationHook *Webhook `json:"registration_hook,omitempty"`
 
 	// RootDomain root domain for group of accounts that share a registration hook
+	//
+	// Example: example.com
 	RootDomain *string `json:"root_domain,omitempty"`
 }
 
@@ -1809,6 +1846,8 @@ type ListAlertsParams struct {
 // CreateLcrForServiceProviderJSONBody defines parameters for CreateLcrForServiceProvider.
 type CreateLcrForServiceProviderJSONBody struct {
 	// Name name or Least Cost Routing
+	//
+	// Example: twilioLcr
 	Name string `json:"name"`
 }
 
@@ -1819,7 +1858,7 @@ type ListRecentCallsBySPParams struct {
 	Days      *float32   `form:"days,omitempty" json:"days,omitempty"`
 	Start     *time.Time `form:"start,omitempty" json:"start,omitempty"`
 	End       *time.Time `form:"end,omitempty" json:"end,omitempty"`
-	Answered  *bool      `form:"answered,omitempty" json:"answered,omitempty"`
+	Answered  *string    `form:"answered,omitempty" json:"answered,omitempty"`
 	Direction *string    `form:"direction,omitempty" json:"direction,omitempty"`
 
 	// From calling number to retrieve
@@ -1862,25 +1901,6 @@ type CreateSipGatewayJSONBody struct {
 
 	// VoipCarrierSid voip carrier that provides this gateway
 	VoipCarrierSid openapi_types.UUID `json:"voip_carrier_sid"`
-}
-
-// CreateSmppGatewayJSONBody defines parameters for CreateSmppGateway.
-type CreateSmppGatewayJSONBody struct {
-	Inbound   *bool    `json:"inbound,omitempty"`
-	Ipv4      string   `json:"ipv4"`
-	IsPrimary *bool    `json:"is_primary,omitempty"`
-	Netmask   *float32 `json:"netmask,omitempty"`
-	Outbound  *bool    `json:"outbound,omitempty"`
-	Port      *float32 `json:"port,omitempty"`
-	UseTls    *bool    `json:"use_tls,omitempty"`
-
-	// VoipCarrierSid voip carrier that provides this gateway
-	VoipCarrierSid openapi_types.UUID `json:"voip_carrier_sid"`
-}
-
-// ListSmppsParams defines parameters for ListSmpps.
-type ListSmppsParams struct {
-	ServiceProviderSid *string `form:"service_provider_sid,omitempty" json:"service_provider_sid,omitempty"`
 }
 
 // ManageSubscriptionJSONBody defines parameters for ManageSubscription.
@@ -1935,12 +1955,16 @@ type UpdateUserJSONBody struct {
 type CreateVoipCarrierJSONBody struct {
 	AccountSid     *string `json:"account_sid,omitempty"`
 	ApplicationSid *string `json:"application_sid,omitempty"`
-	Description    *string `json:"description,omitempty"`
+
+	// Description Example: my US sip trunking provider
+	Description *string `json:"description,omitempty"`
 
 	// Diversion Diversion header or phone number to apply to outbound calls
 	Diversion *string `json:"diversion,omitempty"`
 
 	// E164LeadingPlus whether a leading + is required on INVITEs to this provider
+	//
+	// Example: true
 	E164LeadingPlus *bool `json:"e164_leading_plus,omitempty"`
 
 	// InboundAuthPassword challenge inbound calls with this username/password if supplied
@@ -1951,6 +1975,8 @@ type CreateVoipCarrierJSONBody struct {
 	IsActive            *bool   `json:"is_active,omitempty"`
 
 	// Name voip carrier name
+	//
+	// Example: fastco
 	Name string `json:"name"`
 
 	// RegisterFromDomain optional domain to apply in From header
@@ -1960,27 +1986,28 @@ type CreateVoipCarrierJSONBody struct {
 	RegisterFromUser *string `json:"register_from_user,omitempty"`
 
 	// RegisterPassword sip password to authenticate with, if registration is required
+	//
+	// Example: bar
 	RegisterPassword *string `json:"register_password,omitempty"`
 
 	// RegisterPublicIpInContact if true, use our public ip in Contact header; otherwise, use sip realm
 	RegisterPublicIpInContact *bool `json:"register_public_ip_in_contact,omitempty"`
 
 	// RegisterSipRealm sip realm to authenticate with, if registration is required
+	//
+	// Example: sip.fastco.com
 	RegisterSipRealm *string `json:"register_sip_realm,omitempty"`
 
 	// RegisterUseTls wehther this provider requires us to send a REGISTER use TLS protocol
 	RegisterUseTls *bool `json:"register_use_tls,omitempty"`
 
 	// RegisterUsername sip username to authenticate with, if registration is required
+	//
+	// Example: foo
 	RegisterUsername *string `json:"register_username,omitempty"`
 
 	// RequiresRegister wehther this provider requires us to send a REGISTER to them in order to receive calls
-	RequiresRegister        *bool    `json:"requires_register,omitempty"`
-	SmppEnquireLinkInterval *float32 `json:"smpp_enquire_link_interval,omitempty"`
-	SmppInboundPassword     *string  `json:"smpp_inbound_password,omitempty"`
-	SmppInboundSystemId     *string  `json:"smpp_inbound_system_id,omitempty"`
-	SmppPassword            *string  `json:"smpp_password,omitempty"`
-	SmppSystemId            *string  `json:"smpp_system_id,omitempty"`
+	RequiresRegister *bool `json:"requires_register,omitempty"`
 
 	// TechPrefix prefix to be applied to the called number for outbound call attempts
 	TechPrefix *string `json:"tech_prefix,omitempty"`
@@ -1999,15 +2026,27 @@ type ForgotPasswordJSONBody struct {
 
 // RegisterUserJSONBody defines parameters for RegisterUser.
 type RegisterUserJSONBody struct {
-	Email               *string                      `json:"email,omitempty"`
-	EmailActivationCode *string                      `json:"email_activation_code,omitempty"`
-	Oauth2ClientId      *string                      `json:"oauth2_client_id,omitempty"`
-	Oauth2Code          *string                      `json:"oauth2_code,omitempty"`
-	Oauth2RedirectUri   *string                      `json:"oauth2_redirect_uri,omitempty"`
-	Oauth2State         *string                      `json:"oauth2_state,omitempty"`
-	Password            *string                      `json:"password,omitempty"`
-	Provider            RegisterUserJSONBodyProvider `json:"provider"`
-	ServiceProviderSid  string                       `json:"service_provider_sid"`
+	Email               *string `json:"email,omitempty"`
+	EmailActivationCode *string `json:"email_activation_code,omitempty"`
+
+	// Oauth2ClientId Example: a075a5889264b8fbc831
+	Oauth2ClientId *string `json:"oauth2_client_id,omitempty"`
+
+	// Oauth2Code Example: f82659563e061e7347de
+	Oauth2Code *string `json:"oauth2_code,omitempty"`
+
+	// Oauth2RedirectUri Example: https://localhost:3000/oauth-gh-callback
+	Oauth2RedirectUri *string `json:"oauth2_redirect_uri,omitempty"`
+
+	// Oauth2State Example: 386d2e990ad
+	Oauth2State *string `json:"oauth2_state,omitempty"`
+	Password    *string `json:"password,omitempty"`
+
+	// Provider Example: github
+	Provider RegisterUserJSONBodyProvider `json:"provider"`
+
+	// ServiceProviderSid Example: 2708b1b3-2736-40ea-b502-c53d8396247f
+	ServiceProviderSid string `json:"service_provider_sid"`
 }
 
 // RegisterUserJSONBodyProvider defines parameters for RegisterUser.
@@ -2022,39 +2061,63 @@ type LoginUserJSONBody struct {
 // OnRegistrationAttemptJSONBody defines parameters for OnRegistrationAttempt.
 type OnRegistrationAttemptJSONBody struct {
 	// Algorithm encryption algorithm used, default to MD5 if not provided
+	//
+	// Example: MD5
 	Algorithm *string `json:"algorithm,omitempty"`
 
 	// Cnonce cnonce value
+	//
+	// Example: 6b8b4567
 	Cnonce *string `json:"cnonce,omitempty"`
 
 	// Expires expiration requested, in seconds
+	//
+	// Example: 3600
 	Expires float32 `json:"expires"`
 
 	// Method sip request method
+	//
+	// Example: REGISTER
 	Method string `json:"method"`
 
 	// Nc nc value
+	//
+	// Example: 1
 	Nc *string `json:"nc,omitempty"`
 
 	// Nonce nonce value
+	//
+	// Example: InFriVGWVoKeCckYrTx7wg=="
 	Nonce string `json:"nonce"`
 
 	// Qop qop value
+	//
+	// Example: auth
 	Qop *string `json:"qop,omitempty"`
 
 	// Realm sip realm
+	//
+	// Example: mycompany.com
 	Realm string `json:"realm"`
 
 	// Response digest value calculated by the client
+	//
+	// Example: be641cf7951ff23ab04c57907d59f37d
 	Response string `json:"response"`
 
 	// Scheme encryption protocol
+	//
+	// Example: digest
 	Scheme *string `json:"scheme,omitempty"`
 
 	// Uri sip uri in request
+	//
+	// Example: sip:mycompany.com
 	Uri string `json:"uri"`
 
 	// Username sip username provided
+	//
+	// Example: daveh
 	Username string `json:"username"`
 }
 
@@ -2075,9 +2138,6 @@ type UpdateCallJSONRequestBody UpdateCallJSONBody
 
 // AddLimitForAccountJSONRequestBody defines body for AddLimitForAccount for application/json ContentType.
 type AddLimitForAccountJSONRequestBody = Limits
-
-// CreateMessageJSONRequestBody defines body for CreateMessage for application/json ContentType.
-type CreateMessageJSONRequestBody = Message
 
 // ListRegisteredSipUsersByUsernameJSONRequestBody defines body for ListRegisteredSipUsersByUsername for application/json ContentType.
 type ListRegisteredSipUsersByUsernameJSONRequestBody = ListRegisteredSipUsersByUsernameJSONBody
@@ -2104,7 +2164,7 @@ type CreateApikeyJSONRequestBody CreateApikeyJSONBody
 type CreateApplicationJSONRequestBody CreateApplicationJSONBody
 
 // UpdateApplicationJSONRequestBody defines body for UpdateApplication for application/json ContentType.
-type UpdateApplicationJSONRequestBody UpdateApplicationJSONBody
+type UpdateApplicationJSONRequestBody = Application
 
 // GenerateInviteCodeJSONRequestBody defines body for GenerateInviteCode for application/json ContentType.
 type GenerateInviteCodeJSONRequestBody GenerateInviteCodeJSONBody
@@ -2152,7 +2212,7 @@ type PutTenantJSONRequestBody = MsTeamsTenant
 type CreatePhoneNumberJSONRequestBody CreatePhoneNumberJSONBody
 
 // UpdatePhoneNumberJSONRequestBody defines body for UpdatePhoneNumber for application/json ContentType.
-type UpdatePhoneNumberJSONRequestBody UpdatePhoneNumberJSONBody
+type UpdatePhoneNumberJSONRequestBody = PhoneNumber
 
 // CreateSbcJSONRequestBody defines body for CreateSbc for application/json ContentType.
 type CreateSbcJSONRequestBody CreateSbcJSONBody
@@ -2183,12 +2243,6 @@ type CreateSipGatewayJSONRequestBody CreateSipGatewayJSONBody
 
 // UpdateSipGatewayJSONRequestBody defines body for UpdateSipGateway for application/json ContentType.
 type UpdateSipGatewayJSONRequestBody = SipGateway
-
-// CreateSmppGatewayJSONRequestBody defines body for CreateSmppGateway for application/json ContentType.
-type CreateSmppGatewayJSONRequestBody CreateSmppGatewayJSONBody
-
-// UpdateSmppGatewayJSONRequestBody defines body for UpdateSmppGateway for application/json ContentType.
-type UpdateSmppGatewayJSONRequestBody = SmppGateway
 
 // ManageSubscriptionJSONRequestBody defines body for ManageSubscription for application/json ContentType.
 type ManageSubscriptionJSONRequestBody ManageSubscriptionJSONBody
@@ -2421,20 +2475,6 @@ type ClientInterface interface {
 	//
 	// Corresponds with POST /Accounts/{AccountSid}/Limits (the `AddLimitForAccount` operationId).
 	AddLimitForAccount(ctx context.Context, accountSid openapi_types.UUID, body AddLimitForAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CreateMessageWithBody create an outgoing SMS message
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with POST /Accounts/{AccountSid}/Messages (the `CreateMessage` operationId).
-	CreateMessageWithBody(ctx context.Context, accountSid string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CreateMessage create an outgoing SMS message
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with POST /Accounts/{AccountSid}/Messages (the `CreateMessage` operationId).
-	CreateMessage(ctx context.Context, accountSid string, body CreateMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateVoipCarrierFromTemplate add a VoiPCarrier to an account based on PredefinedCarrier template
 	//
@@ -3231,54 +3271,6 @@ type ClientInterface interface {
 	// Corresponds with PUT /SipGateways/{SipGatewaySid} (the `UpdateSipGateway` operationId).
 	UpdateSipGateway(ctx context.Context, sipGatewaySid string, body UpdateSipGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListSmppGateways list smpp gateways
-	//
-	// Corresponds with GET /SmppGateways (the `ListSmppGateways` operationId).
-	ListSmppGateways(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CreateSmppGatewayWithBody create smpp gateway
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with POST /SmppGateways (the `CreateSmppGateway` operationId).
-	CreateSmppGatewayWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CreateSmppGateway create smpp gateway
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with POST /SmppGateways (the `CreateSmppGateway` operationId).
-	CreateSmppGateway(ctx context.Context, body CreateSmppGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// DeleteSmppGateway delete a smpp gateway
-	//
-	// Corresponds with DELETE /SmppGateways/{SmppGatewaySid} (the `DeleteSmppGateway` operationId).
-	DeleteSmppGateway(ctx context.Context, smppGatewaySid string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetSmppGateway retrieve smpp gateway
-	//
-	// Corresponds with GET /SmppGateways/{SmppGatewaySid} (the `GetSmppGateway` operationId).
-	GetSmppGateway(ctx context.Context, smppGatewaySid string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UpdateSmppGatewayWithBody update smpp gateway
-	//
-	// Takes any type of body and a specified content type.
-	//
-	// Corresponds with PUT /SmppGateways/{SmppGatewaySid} (the `UpdateSmppGateway` operationId).
-	UpdateSmppGatewayWithBody(ctx context.Context, smppGatewaySid string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UpdateSmppGateway update smpp gateway
-	//
-	// Takes a body of the `application/json` content type.
-	//
-	// Corresponds with PUT /SmppGateways/{SmppGatewaySid} (the `UpdateSmppGateway` operationId).
-	UpdateSmppGateway(ctx context.Context, smppGatewaySid string, body UpdateSmppGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// ListSmpps retrieve public IP addresses of the jambonz smpp servers
-	//
-	// Corresponds with GET /Smpps (the `ListSmpps` operationId).
-	ListSmpps(ctx context.Context, params *ListSmppsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetStripeCustomerId retrieve stripe customer id for an account, creating if necessary
 	//
 	// Corresponds with GET /StripeCustomerId (the `GetStripeCustomerId` operationId).
@@ -3800,40 +3792,6 @@ func (c *Client) AddLimitForAccountWithBody(ctx context.Context, accountSid open
 // Corresponds with POST /Accounts/{AccountSid}/Limits (the `AddLimitForAccount` operationId).
 func (c *Client) AddLimitForAccount(ctx context.Context, accountSid openapi_types.UUID, body AddLimitForAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAddLimitForAccountRequest(c.Server, accountSid, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// CreateMessageWithBody create an outgoing SMS message
-//
-// Takes any type of body and a specified content type.
-//
-// Corresponds with POST /Accounts/{AccountSid}/Messages (the `CreateMessage` operationId).
-func (c *Client) CreateMessageWithBody(ctx context.Context, accountSid string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateMessageRequestWithBody(c.Server, accountSid, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// CreateMessage create an outgoing SMS message
-//
-// Takes a body of the `application/json` content type.
-//
-// Corresponds with POST /Accounts/{AccountSid}/Messages (the `CreateMessage` operationId).
-func (c *Client) CreateMessage(ctx context.Context, accountSid string, body CreateMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateMessageRequest(c.Server, accountSid, body)
 	if err != nil {
 		return nil, err
 	}
@@ -5949,134 +5907,6 @@ func (c *Client) UpdateSipGateway(ctx context.Context, sipGatewaySid string, bod
 	return c.Client.Do(req)
 }
 
-// ListSmppGateways list smpp gateways
-//
-// Corresponds with GET /SmppGateways (the `ListSmppGateways` operationId).
-func (c *Client) ListSmppGateways(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListSmppGatewaysRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// CreateSmppGatewayWithBody create smpp gateway
-//
-// Takes any type of body and a specified content type.
-//
-// Corresponds with POST /SmppGateways (the `CreateSmppGateway` operationId).
-func (c *Client) CreateSmppGatewayWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateSmppGatewayRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// CreateSmppGateway create smpp gateway
-//
-// Takes a body of the `application/json` content type.
-//
-// Corresponds with POST /SmppGateways (the `CreateSmppGateway` operationId).
-func (c *Client) CreateSmppGateway(ctx context.Context, body CreateSmppGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateSmppGatewayRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// DeleteSmppGateway delete a smpp gateway
-//
-// Corresponds with DELETE /SmppGateways/{SmppGatewaySid} (the `DeleteSmppGateway` operationId).
-func (c *Client) DeleteSmppGateway(ctx context.Context, smppGatewaySid string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteSmppGatewayRequest(c.Server, smppGatewaySid)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// GetSmppGateway retrieve smpp gateway
-//
-// Corresponds with GET /SmppGateways/{SmppGatewaySid} (the `GetSmppGateway` operationId).
-func (c *Client) GetSmppGateway(ctx context.Context, smppGatewaySid string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSmppGatewayRequest(c.Server, smppGatewaySid)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// UpdateSmppGatewayWithBody update smpp gateway
-//
-// Takes any type of body and a specified content type.
-//
-// Corresponds with PUT /SmppGateways/{SmppGatewaySid} (the `UpdateSmppGateway` operationId).
-func (c *Client) UpdateSmppGatewayWithBody(ctx context.Context, smppGatewaySid string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateSmppGatewayRequestWithBody(c.Server, smppGatewaySid, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// UpdateSmppGateway update smpp gateway
-//
-// Takes a body of the `application/json` content type.
-//
-// Corresponds with PUT /SmppGateways/{SmppGatewaySid} (the `UpdateSmppGateway` operationId).
-func (c *Client) UpdateSmppGateway(ctx context.Context, smppGatewaySid string, body UpdateSmppGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateSmppGatewayRequest(c.Server, smppGatewaySid, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-// ListSmpps retrieve public IP addresses of the jambonz smpp servers
-//
-// Corresponds with GET /Smpps (the `ListSmpps` operationId).
-func (c *Client) ListSmpps(ctx context.Context, params *ListSmppsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListSmppsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 // GetStripeCustomerId retrieve stripe customer id for an account, creating if necessary
 //
 // Corresponds with GET /StripeCustomerId (the `GetStripeCustomerId` operationId).
@@ -7340,53 +7170,6 @@ func NewAddLimitForAccountRequestWithBody(server string, accountSid openapi_type
 	return req, nil
 }
 
-// NewCreateMessageRequest calls the generic CreateMessage builder with application/json body
-func NewCreateMessageRequest(server string, accountSid string, body CreateMessageJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewCreateMessageRequestWithBody(server, accountSid, "application/json", bodyReader)
-}
-
-// NewCreateMessageRequestWithBody constructs an http.Request for the CreateMessage method, with any body, and a specified content type
-func NewCreateMessageRequestWithBody(server string, accountSid string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "AccountSid", accountSid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/Accounts/%s/Messages", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
 // NewCreateVoipCarrierFromTemplateRequest constructs an http.Request for the CreateVoipCarrierFromTemplate method
 func NewCreateVoipCarrierFromTemplateRequest(server string, accountSid openapi_types.UUID, predefinedCarrierSid openapi_types.UUID) (*http.Request, error) {
 	var err error
@@ -7578,7 +7361,7 @@ func NewListRecentCallsRequest(server string, accountSid openapi_types.UUID, par
 
 		if params.Answered != nil {
 
-			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "answered", *params.Answered, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "answered", *params.Answered, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
 				return nil, err
 			} else {
 				for _, qp := range strings.Split(queryFrag, "&") {
@@ -10854,7 +10637,7 @@ func NewListRecentCallsBySPRequest(server string, serviceProviderSid openapi_typ
 
 		if params.Answered != nil {
 
-			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "answered", *params.Answered, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "boolean", Format: ""}); err != nil {
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "answered", *params.Answered, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
 				return nil, err
 			} else {
 				for _, qp := range strings.Split(queryFrag, "&") {
@@ -11571,242 +11354,6 @@ func NewUpdateSipGatewayRequestWithBody(server string, sipGatewaySid string, con
 	}
 
 	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewListSmppGatewaysRequest constructs an http.Request for the ListSmppGateways method
-func NewListSmppGatewaysRequest(server string) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/SmppGateways")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewCreateSmppGatewayRequest calls the generic CreateSmppGateway builder with application/json body
-func NewCreateSmppGatewayRequest(server string, body CreateSmppGatewayJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewCreateSmppGatewayRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewCreateSmppGatewayRequestWithBody constructs an http.Request for the CreateSmppGateway method, with any body, and a specified content type
-func NewCreateSmppGatewayRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/SmppGateways")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewDeleteSmppGatewayRequest constructs an http.Request for the DeleteSmppGateway method
-func NewDeleteSmppGatewayRequest(server string, smppGatewaySid string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "SmppGatewaySid", smppGatewaySid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/SmppGateways/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetSmppGatewayRequest constructs an http.Request for the GetSmppGateway method
-func NewGetSmppGatewayRequest(server string, smppGatewaySid string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "SmppGatewaySid", smppGatewaySid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/SmppGateways/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewUpdateSmppGatewayRequest calls the generic UpdateSmppGateway builder with application/json body
-func NewUpdateSmppGatewayRequest(server string, smppGatewaySid string, body UpdateSmppGatewayJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUpdateSmppGatewayRequestWithBody(server, smppGatewaySid, "application/json", bodyReader)
-}
-
-// NewUpdateSmppGatewayRequestWithBody constructs an http.Request for the UpdateSmppGateway method, with any body, and a specified content type
-func NewUpdateSmppGatewayRequestWithBody(server string, smppGatewaySid string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "SmppGatewaySid", smppGatewaySid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/SmppGateways/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewListSmppsRequest constructs an http.Request for the ListSmpps method
-func NewListSmppsRequest(server string, params *ListSmppsParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/Smpps")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		// queryValues collects non-styled parameters (passthrough, JSON)
-		// that are safe to round-trip through url.Values.Encode().
-		queryValues := queryURL.Query()
-		// rawQueryFragments collects pre-encoded query fragments from
-		// styled parameters, preserving literal commas as delimiters
-		// per the OpenAPI spec (e.g. "color=blue,black,brown").
-		var rawQueryFragments []string
-
-		if params.ServiceProviderSid != nil {
-
-			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "service_provider_sid", *params.ServiceProviderSid, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
-				return nil, err
-			} else {
-				for _, qp := range strings.Split(queryFrag, "&") {
-					rawQueryFragments = append(rawQueryFragments, qp)
-				}
-			}
-
-		}
-
-		if encoded := queryValues.Encode(); encoded != "" {
-			rawQueryFragments = append(rawQueryFragments, encoded)
-		}
-		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
-	}
-
-	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
 
 	return req, nil
 }
@@ -12755,20 +12302,6 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with POST /Accounts/{AccountSid}/Limits (the `AddLimitForAccount` operationId).
 	AddLimitForAccountWithResponse(ctx context.Context, accountSid openapi_types.UUID, body AddLimitForAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*AddLimitForAccountResponse, error)
 
-	// CreateMessageWithBodyWithResponse create an outgoing SMS message
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with POST /Accounts/{AccountSid}/Messages (the `CreateMessage` operationId).
-	CreateMessageWithBodyWithResponse(ctx context.Context, accountSid string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateMessageResponse, error)
-
-	// CreateMessageWithResponse create an outgoing SMS message
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with POST /Accounts/{AccountSid}/Messages (the `CreateMessage` operationId).
-	CreateMessageWithResponse(ctx context.Context, accountSid string, body CreateMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateMessageResponse, error)
-
 	// CreateVoipCarrierFromTemplateWithResponse add a VoiPCarrier to an account based on PredefinedCarrier template
 	//
 	// Returns a wrapper object for the known response body format(s).
@@ -13686,62 +13219,6 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with PUT /SipGateways/{SipGatewaySid} (the `UpdateSipGateway` operationId).
 	UpdateSipGatewayWithResponse(ctx context.Context, sipGatewaySid string, body UpdateSipGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateSipGatewayResponse, error)
 
-	// ListSmppGatewaysWithResponse list smpp gateways
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with GET /SmppGateways (the `ListSmppGateways` operationId).
-	ListSmppGatewaysWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListSmppGatewaysResponse, error)
-
-	// CreateSmppGatewayWithBodyWithResponse create smpp gateway
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with POST /SmppGateways (the `CreateSmppGateway` operationId).
-	CreateSmppGatewayWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSmppGatewayResponse, error)
-
-	// CreateSmppGatewayWithResponse create smpp gateway
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with POST /SmppGateways (the `CreateSmppGateway` operationId).
-	CreateSmppGatewayWithResponse(ctx context.Context, body CreateSmppGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSmppGatewayResponse, error)
-
-	// DeleteSmppGatewayWithResponse delete a smpp gateway
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with DELETE /SmppGateways/{SmppGatewaySid} (the `DeleteSmppGateway` operationId).
-	DeleteSmppGatewayWithResponse(ctx context.Context, smppGatewaySid string, reqEditors ...RequestEditorFn) (*DeleteSmppGatewayResponse, error)
-
-	// GetSmppGatewayWithResponse retrieve smpp gateway
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with GET /SmppGateways/{SmppGatewaySid} (the `GetSmppGateway` operationId).
-	GetSmppGatewayWithResponse(ctx context.Context, smppGatewaySid string, reqEditors ...RequestEditorFn) (*GetSmppGatewayResponse, error)
-
-	// UpdateSmppGatewayWithBodyWithResponse update smpp gateway
-	//
-	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PUT /SmppGateways/{SmppGatewaySid} (the `UpdateSmppGateway` operationId).
-	UpdateSmppGatewayWithBodyWithResponse(ctx context.Context, smppGatewaySid string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateSmppGatewayResponse, error)
-
-	// UpdateSmppGatewayWithResponse update smpp gateway
-	//
-	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with PUT /SmppGateways/{SmppGatewaySid} (the `UpdateSmppGateway` operationId).
-	UpdateSmppGatewayWithResponse(ctx context.Context, smppGatewaySid string, body UpdateSmppGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateSmppGatewayResponse, error)
-
-	// ListSmppsWithResponse retrieve public IP addresses of the jambonz smpp servers
-	//
-	// Returns a wrapper object for the known response body format(s).
-	//
-	// Corresponds with GET /Smpps (the `ListSmpps` operationId).
-	ListSmppsWithResponse(ctx context.Context, params *ListSmppsParams, reqEditors ...RequestEditorFn) (*ListSmppsResponse, error)
-
 	// GetStripeCustomerIdWithResponse retrieve stripe customer id for an account, creating if necessary
 	//
 	// Returns a wrapper object for the known response body format(s).
@@ -14442,12 +13919,14 @@ type CreateCallResponse struct {
 	HTTPResponse *http.Response
 	// JSON201 the response for an HTTP 201 `application/json` response
 	JSON201 *struct {
+		// Sid Example: 2531329f-fb09-4ef7-887e-84e648214436
 		Sid openapi_types.UUID `json:"sid"`
 	}
 }
 
 // GetJSON201 returns the response for an HTTP 201 `application/json` response
 func (r CreateCallResponse) GetJSON201() *struct {
+	// Sid Example: 2531329f-fb09-4ef7-887e-84e648214436
 	Sid openapi_types.UUID `json:"sid"`
 } {
 	return r.JSON201
@@ -14764,68 +14243,6 @@ func (r AddLimitForAccountResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r AddLimitForAccountResponse) ContentType() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Header.Get("Content-Type")
-	}
-	return ""
-}
-
-type CreateMessageResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	// JSON201 the response for an HTTP 201 `application/json` response
-	JSON201 *struct {
-		ProviderResponse *string            `json:"providerResponse,omitempty"`
-		Sid              openapi_types.UUID `json:"sid"`
-	}
-	// JSON480 the response for an HTTP 480 `application/json` response
-	JSON480 *struct {
-		Message     *string            `json:"message,omitempty"`
-		Sid         openapi_types.UUID `json:"sid"`
-		SmppErrCode *string            `json:"smpp_err_code,omitempty"`
-	}
-}
-
-// GetJSON201 returns the response for an HTTP 201 `application/json` response
-func (r CreateMessageResponse) GetJSON201() *struct {
-	ProviderResponse *string            `json:"providerResponse,omitempty"`
-	Sid              openapi_types.UUID `json:"sid"`
-} {
-	return r.JSON201
-}
-
-// GetJSON480 returns the response for an HTTP 480 `application/json` response
-func (r CreateMessageResponse) GetJSON480() *struct {
-	Message     *string            `json:"message,omitempty"`
-	Sid         openapi_types.UUID `json:"sid"`
-	SmppErrCode *string            `json:"smpp_err_code,omitempty"`
-} {
-	return r.JSON480
-}
-
-// GetBody returns the raw response body bytes
-func (r CreateMessageResponse) GetBody() []byte {
-	return r.Body
-}
-
-// Status returns HTTPResponse.Status
-func (r CreateMessageResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r CreateMessageResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r CreateMessageResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -17912,10 +17329,17 @@ func (r GetPhoneNumberResponse) ContentType() string {
 type UpdatePhoneNumberResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	// JSON204 the response for an HTTP 204 `application/json` response
+	JSON204 *VoipCarrier
 	// JSON400 the response for an HTTP 400 `application/json` response
 	JSON400 *GeneralError
 	// JSON500 the response for an HTTP 500 `application/json` response
 	JSON500 *GeneralError
+}
+
+// GetJSON204 returns the response for an HTTP 204 `application/json` response
+func (r UpdatePhoneNumberResponse) GetJSON204() *VoipCarrier {
+	return r.JSON204
 }
 
 // GetJSON400 returns the response for an HTTP 400 `application/json` response
@@ -19536,313 +18960,6 @@ func (r UpdateSipGatewayResponse) ContentType() string {
 	return ""
 }
 
-type ListSmppGatewaysResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	// JSON200 the response for an HTTP 200 `application/json` response
-	JSON200 *[]SmppGateway
-	// JSON500 the response for an HTTP 500 `application/json` response
-	JSON500 *GeneralError
-}
-
-// GetJSON200 returns the response for an HTTP 200 `application/json` response
-func (r ListSmppGatewaysResponse) GetJSON200() *[]SmppGateway {
-	return r.JSON200
-}
-
-// GetJSON500 returns the response for an HTTP 500 `application/json` response
-func (r ListSmppGatewaysResponse) GetJSON500() *GeneralError {
-	return r.JSON500
-}
-
-// GetBody returns the raw response body bytes
-func (r ListSmppGatewaysResponse) GetBody() []byte {
-	return r.Body
-}
-
-// Status returns HTTPResponse.Status
-func (r ListSmppGatewaysResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r ListSmppGatewaysResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r ListSmppGatewaysResponse) ContentType() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Header.Get("Content-Type")
-	}
-	return ""
-}
-
-type CreateSmppGatewayResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	// JSON201 the response for an HTTP 201 `application/json` response
-	JSON201 *SuccessfulAdd
-	// JSON400 the response for an HTTP 400 `application/json` response
-	JSON400 *GeneralError
-	// JSON422 the response for an HTTP 422 `application/json` response
-	JSON422 *GeneralError
-	// JSON500 the response for an HTTP 500 `application/json` response
-	JSON500 *GeneralError
-}
-
-// GetJSON201 returns the response for an HTTP 201 `application/json` response
-func (r CreateSmppGatewayResponse) GetJSON201() *SuccessfulAdd {
-	return r.JSON201
-}
-
-// GetJSON400 returns the response for an HTTP 400 `application/json` response
-func (r CreateSmppGatewayResponse) GetJSON400() *GeneralError {
-	return r.JSON400
-}
-
-// GetJSON422 returns the response for an HTTP 422 `application/json` response
-func (r CreateSmppGatewayResponse) GetJSON422() *GeneralError {
-	return r.JSON422
-}
-
-// GetJSON500 returns the response for an HTTP 500 `application/json` response
-func (r CreateSmppGatewayResponse) GetJSON500() *GeneralError {
-	return r.JSON500
-}
-
-// GetBody returns the raw response body bytes
-func (r CreateSmppGatewayResponse) GetBody() []byte {
-	return r.Body
-}
-
-// Status returns HTTPResponse.Status
-func (r CreateSmppGatewayResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r CreateSmppGatewayResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r CreateSmppGatewayResponse) ContentType() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Header.Get("Content-Type")
-	}
-	return ""
-}
-
-type DeleteSmppGatewayResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	// JSON500 the response for an HTTP 500 `application/json` response
-	JSON500 *GeneralError
-}
-
-// GetJSON500 returns the response for an HTTP 500 `application/json` response
-func (r DeleteSmppGatewayResponse) GetJSON500() *GeneralError {
-	return r.JSON500
-}
-
-// GetBody returns the raw response body bytes
-func (r DeleteSmppGatewayResponse) GetBody() []byte {
-	return r.Body
-}
-
-// Status returns HTTPResponse.Status
-func (r DeleteSmppGatewayResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r DeleteSmppGatewayResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r DeleteSmppGatewayResponse) ContentType() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Header.Get("Content-Type")
-	}
-	return ""
-}
-
-type GetSmppGatewayResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	// JSON200 the response for an HTTP 200 `application/json` response
-	JSON200 *SmppGateway
-	// JSON500 the response for an HTTP 500 `application/json` response
-	JSON500 *GeneralError
-}
-
-// GetJSON200 returns the response for an HTTP 200 `application/json` response
-func (r GetSmppGatewayResponse) GetJSON200() *SmppGateway {
-	return r.JSON200
-}
-
-// GetJSON500 returns the response for an HTTP 500 `application/json` response
-func (r GetSmppGatewayResponse) GetJSON500() *GeneralError {
-	return r.JSON500
-}
-
-// GetBody returns the raw response body bytes
-func (r GetSmppGatewayResponse) GetBody() []byte {
-	return r.Body
-}
-
-// Status returns HTTPResponse.Status
-func (r GetSmppGatewayResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetSmppGatewayResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r GetSmppGatewayResponse) ContentType() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Header.Get("Content-Type")
-	}
-	return ""
-}
-
-type UpdateSmppGatewayResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	// JSON400 the response for an HTTP 400 `application/json` response
-	JSON400 *GeneralError
-	// JSON500 the response for an HTTP 500 `application/json` response
-	JSON500 *GeneralError
-}
-
-// GetJSON400 returns the response for an HTTP 400 `application/json` response
-func (r UpdateSmppGatewayResponse) GetJSON400() *GeneralError {
-	return r.JSON400
-}
-
-// GetJSON500 returns the response for an HTTP 500 `application/json` response
-func (r UpdateSmppGatewayResponse) GetJSON500() *GeneralError {
-	return r.JSON500
-}
-
-// GetBody returns the raw response body bytes
-func (r UpdateSmppGatewayResponse) GetBody() []byte {
-	return r.Body
-}
-
-// Status returns HTTPResponse.Status
-func (r UpdateSmppGatewayResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UpdateSmppGatewayResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r UpdateSmppGatewayResponse) ContentType() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Header.Get("Content-Type")
-	}
-	return ""
-}
-
-type ListSmppsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	// JSON200 the response for an HTTP 200 `application/json` response
-	JSON200 *[]struct {
-		// Ipv4 ip address of one of our Sbcs
-		Ipv4      string  `json:"ipv4"`
-		IsPrimary bool    `json:"is_primary"`
-		Port      float32 `json:"port"`
-		UseTls    bool    `json:"use_tls"`
-	}
-	// JSON500 the response for an HTTP 500 `application/json` response
-	JSON500 *GeneralError
-}
-
-// GetJSON200 returns the response for an HTTP 200 `application/json` response
-func (r ListSmppsResponse) GetJSON200() *[]struct {
-	// Ipv4 ip address of one of our Sbcs
-	Ipv4      string  `json:"ipv4"`
-	IsPrimary bool    `json:"is_primary"`
-	Port      float32 `json:"port"`
-	UseTls    bool    `json:"use_tls"`
-} {
-	return r.JSON200
-}
-
-// GetJSON500 returns the response for an HTTP 500 `application/json` response
-func (r ListSmppsResponse) GetJSON500() *GeneralError {
-	return r.JSON500
-}
-
-// GetBody returns the raw response body bytes
-func (r ListSmppsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// Status returns HTTPResponse.Status
-func (r ListSmppsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r ListSmppsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r ListSmppsResponse) ContentType() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Header.Get("Content-Type")
-	}
-	return ""
-}
-
 type GetStripeCustomerIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -21155,32 +20272,6 @@ func (c *ClientWithResponses) AddLimitForAccountWithResponse(ctx context.Context
 		return nil, err
 	}
 	return ParseAddLimitForAccountResponse(rsp)
-}
-
-// CreateMessageWithBodyWithResponse create an outgoing SMS message
-//
-// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-//
-// Corresponds with POST /Accounts/{AccountSid}/Messages (the `CreateMessage` operationId).
-func (c *ClientWithResponses) CreateMessageWithBodyWithResponse(ctx context.Context, accountSid string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateMessageResponse, error) {
-	rsp, err := c.CreateMessageWithBody(ctx, accountSid, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateMessageResponse(rsp)
-}
-
-// CreateMessageWithResponse create an outgoing SMS message
-//
-// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-//
-// Corresponds with POST /Accounts/{AccountSid}/Messages (the `CreateMessage` operationId).
-func (c *ClientWithResponses) CreateMessageWithResponse(ctx context.Context, accountSid string, body CreateMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateMessageResponse, error) {
-	rsp, err := c.CreateMessage(ctx, accountSid, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateMessageResponse(rsp)
 }
 
 // CreateVoipCarrierFromTemplateWithResponse add a VoiPCarrier to an account based on PredefinedCarrier template
@@ -22886,110 +21977,6 @@ func (c *ClientWithResponses) UpdateSipGatewayWithResponse(ctx context.Context, 
 	return ParseUpdateSipGatewayResponse(rsp)
 }
 
-// ListSmppGatewaysWithResponse list smpp gateways
-//
-// Returns a wrapper object for the known response body format(s).
-//
-// Corresponds with GET /SmppGateways (the `ListSmppGateways` operationId).
-func (c *ClientWithResponses) ListSmppGatewaysWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListSmppGatewaysResponse, error) {
-	rsp, err := c.ListSmppGateways(ctx, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseListSmppGatewaysResponse(rsp)
-}
-
-// CreateSmppGatewayWithBodyWithResponse create smpp gateway
-//
-// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-//
-// Corresponds with POST /SmppGateways (the `CreateSmppGateway` operationId).
-func (c *ClientWithResponses) CreateSmppGatewayWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSmppGatewayResponse, error) {
-	rsp, err := c.CreateSmppGatewayWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateSmppGatewayResponse(rsp)
-}
-
-// CreateSmppGatewayWithResponse create smpp gateway
-//
-// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-//
-// Corresponds with POST /SmppGateways (the `CreateSmppGateway` operationId).
-func (c *ClientWithResponses) CreateSmppGatewayWithResponse(ctx context.Context, body CreateSmppGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSmppGatewayResponse, error) {
-	rsp, err := c.CreateSmppGateway(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateSmppGatewayResponse(rsp)
-}
-
-// DeleteSmppGatewayWithResponse delete a smpp gateway
-//
-// Returns a wrapper object for the known response body format(s).
-//
-// Corresponds with DELETE /SmppGateways/{SmppGatewaySid} (the `DeleteSmppGateway` operationId).
-func (c *ClientWithResponses) DeleteSmppGatewayWithResponse(ctx context.Context, smppGatewaySid string, reqEditors ...RequestEditorFn) (*DeleteSmppGatewayResponse, error) {
-	rsp, err := c.DeleteSmppGateway(ctx, smppGatewaySid, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDeleteSmppGatewayResponse(rsp)
-}
-
-// GetSmppGatewayWithResponse retrieve smpp gateway
-//
-// Returns a wrapper object for the known response body format(s).
-//
-// Corresponds with GET /SmppGateways/{SmppGatewaySid} (the `GetSmppGateway` operationId).
-func (c *ClientWithResponses) GetSmppGatewayWithResponse(ctx context.Context, smppGatewaySid string, reqEditors ...RequestEditorFn) (*GetSmppGatewayResponse, error) {
-	rsp, err := c.GetSmppGateway(ctx, smppGatewaySid, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetSmppGatewayResponse(rsp)
-}
-
-// UpdateSmppGatewayWithBodyWithResponse update smpp gateway
-//
-// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
-//
-// Corresponds with PUT /SmppGateways/{SmppGatewaySid} (the `UpdateSmppGateway` operationId).
-func (c *ClientWithResponses) UpdateSmppGatewayWithBodyWithResponse(ctx context.Context, smppGatewaySid string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateSmppGatewayResponse, error) {
-	rsp, err := c.UpdateSmppGatewayWithBody(ctx, smppGatewaySid, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUpdateSmppGatewayResponse(rsp)
-}
-
-// UpdateSmppGatewayWithResponse update smpp gateway
-//
-// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
-//
-// Corresponds with PUT /SmppGateways/{SmppGatewaySid} (the `UpdateSmppGateway` operationId).
-func (c *ClientWithResponses) UpdateSmppGatewayWithResponse(ctx context.Context, smppGatewaySid string, body UpdateSmppGatewayJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateSmppGatewayResponse, error) {
-	rsp, err := c.UpdateSmppGateway(ctx, smppGatewaySid, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUpdateSmppGatewayResponse(rsp)
-}
-
-// ListSmppsWithResponse retrieve public IP addresses of the jambonz smpp servers
-//
-// Returns a wrapper object for the known response body format(s).
-//
-// Corresponds with GET /Smpps (the `ListSmpps` operationId).
-func (c *ClientWithResponses) ListSmppsWithResponse(ctx context.Context, params *ListSmppsParams, reqEditors ...RequestEditorFn) (*ListSmppsResponse, error) {
-	rsp, err := c.ListSmpps(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseListSmppsResponse(rsp)
-}
-
 // GetStripeCustomerIdWithResponse retrieve stripe customer id for an account, creating if necessary
 //
 // Returns a wrapper object for the known response body format(s).
@@ -23756,6 +22743,7 @@ func ParseCreateCallResponse(rsp *http.Response) (*CreateCallResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
 		var dest struct {
+			// Sid Example: 2531329f-fb09-4ef7-887e-84e648214436
 			Sid openapi_types.UUID `json:"sid"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -23990,49 +22978,6 @@ func ParseAddLimitForAccountResponse(rsp *http.Response) (*AddLimitForAccountRes
 			return nil, err
 		}
 		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseCreateMessageResponse parses an HTTP response from a CreateMessageWithResponse call
-func ParseCreateMessageResponse(rsp *http.Response) (*CreateMessageResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &CreateMessageResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest struct {
-			ProviderResponse *string            `json:"providerResponse,omitempty"`
-			Sid              openapi_types.UUID `json:"sid"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON201 = &dest
-
-	case rsp.StatusCode == 400:
-		break // No content-type
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 480:
-		var dest struct {
-			Message     *string            `json:"message,omitempty"`
-			Sid         openapi_types.UUID `json:"sid"`
-			SmppErrCode *string            `json:"smpp_err_code,omitempty"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON480 = &dest
 
 	}
 
@@ -26282,8 +25227,12 @@ func ParseUpdatePhoneNumberResponse(rsp *http.Response) (*UpdatePhoneNumberRespo
 	}
 
 	switch {
-	case rsp.StatusCode == 204:
-		break // No content-type
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest VoipCarrier
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest GeneralError
@@ -27396,232 +26345,6 @@ func ParseUpdateSipGatewayResponse(rsp *http.Response) (*UpdateSipGatewayRespons
 
 	case rsp.StatusCode == 404:
 		break // No content-type
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseListSmppGatewaysResponse parses an HTTP response from a ListSmppGatewaysWithResponse call
-func ParseListSmppGatewaysResponse(rsp *http.Response) (*ListSmppGatewaysResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ListSmppGatewaysResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []SmppGateway
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseCreateSmppGatewayResponse parses an HTTP response from a CreateSmppGatewayWithResponse call
-func ParseCreateSmppGatewayResponse(rsp *http.Response) (*CreateSmppGatewayResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &CreateSmppGatewayResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest SuccessfulAdd
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON201 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON422 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseDeleteSmppGatewayResponse parses an HTTP response from a DeleteSmppGatewayWithResponse call
-func ParseDeleteSmppGatewayResponse(rsp *http.Response) (*DeleteSmppGatewayResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DeleteSmppGatewayResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case rsp.StatusCode == 204:
-		break // No content-type
-
-	case rsp.StatusCode == 404:
-		break // No content-type
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetSmppGatewayResponse parses an HTTP response from a GetSmppGatewayWithResponse call
-func ParseGetSmppGatewayResponse(rsp *http.Response) (*GetSmppGatewayResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetSmppGatewayResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest SmppGateway
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case rsp.StatusCode == 404:
-		break // No content-type
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUpdateSmppGatewayResponse parses an HTTP response from a UpdateSmppGatewayWithResponse call
-func ParseUpdateSmppGatewayResponse(rsp *http.Response) (*UpdateSmppGatewayResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UpdateSmppGatewayResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case rsp.StatusCode == 204:
-		break // No content-type
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case rsp.StatusCode == 404:
-		break // No content-type
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest GeneralError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseListSmppsResponse parses an HTTP response from a ListSmppsWithResponse call
-func ParseListSmppsResponse(rsp *http.Response) (*ListSmppsResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ListSmppsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []struct {
-			// Ipv4 ip address of one of our Sbcs
-			Ipv4      string  `json:"ipv4"`
-			IsPrimary bool    `json:"is_primary"`
-			Port      float32 `json:"port"`
-			UseTls    bool    `json:"use_tls"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
 		var dest GeneralError

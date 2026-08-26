@@ -5,11 +5,9 @@ package resource_application
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -25,6 +23,12 @@ func ApplicationResourceSchema(ctx context.Context) schema.Schema {
 			"account_sid": schema.StringAttribute{
 				Required: true,
 			},
+			"app_json": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "Voice Application Json, call_hook will not be invoked if app_json is provided",
+				MarkdownDescription: "Voice Application Json, call_hook will not be invoked if app_json is provided",
+			},
 			"application_sid": schema.StringAttribute{
 				Computed: true,
 			},
@@ -35,21 +39,22 @@ func ApplicationResourceSchema(ctx context.Context) schema.Schema {
 						Computed: true,
 						Validators: []validator.String{
 							stringvalidator.OneOf(
-								"GET",
-								"POST",
+								"get",
+								"post",
 							),
 						},
-						Default: stringdefault.StaticString("POST"),
 					},
 					"password": schema.StringAttribute{
-						Required:  true,
+						Optional:  true,
+						Computed:  true,
 						Sensitive: true,
 					},
 					"url": schema.StringAttribute{
 						Required: true,
 					},
 					"username": schema.StringAttribute{
-						Required: true,
+						Optional: true,
+						Computed: true,
 					},
 					"webhook_sid": schema.StringAttribute{
 						Optional: true,
@@ -70,21 +75,22 @@ func ApplicationResourceSchema(ctx context.Context) schema.Schema {
 						Computed: true,
 						Validators: []validator.String{
 							stringvalidator.OneOf(
-								"GET",
-								"POST",
+								"get",
+								"post",
 							),
 						},
-						Default: stringdefault.StaticString("POST"),
 					},
 					"password": schema.StringAttribute{
-						Required:  true,
+						Optional:  true,
+						Computed:  true,
 						Sensitive: true,
 					},
 					"url": schema.StringAttribute{
 						Required: true,
 					},
 					"username": schema.StringAttribute{
-						Required: true,
+						Optional: true,
+						Computed: true,
 					},
 					"webhook_sid": schema.StringAttribute{
 						Optional: true,
@@ -98,67 +104,42 @@ func ApplicationResourceSchema(ctx context.Context) schema.Schema {
 				},
 				Required: true,
 			},
-			"messaging_hook": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"method": schema.StringAttribute{
-						Optional: true,
-						Computed: true,
-						Validators: []validator.String{
-							stringvalidator.OneOf(
-								"GET",
-								"POST",
-							),
-						},
-						Default: stringdefault.StaticString("POST"),
-					},
-					"password": schema.StringAttribute{
-						Required:  true,
-						Sensitive: true,
-					},
-					"url": schema.StringAttribute{
-						Required: true,
-					},
-					"username": schema.StringAttribute{
-						Required: true,
-					},
-					"webhook_sid": schema.StringAttribute{
-						Optional: true,
-						Computed: true,
-					},
-				},
-				CustomType: MessagingHookType{
-					ObjectType: types.ObjectType{
-						AttrTypes: MessagingHookValue{}.AttributeTypes(ctx),
-					},
-				},
-				Required: true,
-			},
 			"name": schema.StringAttribute{
 				Required:            true,
 				Description:         "application name",
 				MarkdownDescription: "application name",
 			},
-			"record_all_calls": schema.Int64Attribute{
-				Required: true,
-				Validators: []validator.Int64{
-					int64validator.OneOf(
-						0,
-						1,
-					),
-				},
+			"speech_recognizer_language": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+			"speech_recognizer_vendor": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+			"speech_synthesis_vendor": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+			},
+			"speech_synthesis_voice": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
 			},
 		},
 	}
 }
 
 type ApplicationModel struct {
-	AccountSid     types.String        `tfsdk:"account_sid"`
-	ApplicationSid types.String        `tfsdk:"application_sid"`
-	CallHook       CallHookValue       `tfsdk:"call_hook"`
-	CallStatusHook CallStatusHookValue `tfsdk:"call_status_hook"`
-	MessagingHook  MessagingHookValue  `tfsdk:"messaging_hook"`
-	Name           types.String        `tfsdk:"name"`
-	RecordAllCalls types.Int64         `tfsdk:"record_all_calls"`
+	AccountSid               types.String        `tfsdk:"account_sid"`
+	AppJson                  types.String        `tfsdk:"app_json"`
+	ApplicationSid           types.String        `tfsdk:"application_sid"`
+	CallHook                 CallHookValue       `tfsdk:"call_hook"`
+	CallStatusHook           CallStatusHookValue `tfsdk:"call_status_hook"`
+	Name                     types.String        `tfsdk:"name"`
+	SpeechRecognizerLanguage types.String        `tfsdk:"speech_recognizer_language"`
+	SpeechRecognizerVendor   types.String        `tfsdk:"speech_recognizer_vendor"`
+	SpeechSynthesisVendor    types.String        `tfsdk:"speech_synthesis_vendor"`
+	SpeechSynthesisVoice     types.String        `tfsdk:"speech_synthesis_voice"`
 }
 
 var _ basetypes.ObjectTypable = CallHookType{}
@@ -1240,550 +1221,6 @@ func (v CallStatusHookValue) Type(ctx context.Context) attr.Type {
 }
 
 func (v CallStatusHookValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
-	return map[string]attr.Type{
-		"method":      basetypes.StringType{},
-		"password":    basetypes.StringType{},
-		"url":         basetypes.StringType{},
-		"username":    basetypes.StringType{},
-		"webhook_sid": basetypes.StringType{},
-	}
-}
-
-var _ basetypes.ObjectTypable = MessagingHookType{}
-
-type MessagingHookType struct {
-	basetypes.ObjectType
-}
-
-func (t MessagingHookType) Equal(o attr.Type) bool {
-	other, ok := o.(MessagingHookType)
-
-	if !ok {
-		return false
-	}
-
-	return t.ObjectType.Equal(other.ObjectType)
-}
-
-func (t MessagingHookType) String() string {
-	return "MessagingHookType"
-}
-
-func (t MessagingHookType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	attributes := in.Attributes()
-
-	methodAttribute, ok := attributes["method"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`method is missing from object`)
-
-		return nil, diags
-	}
-
-	methodVal, ok := methodAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`method expected to be basetypes.StringValue, was: %T`, methodAttribute))
-	}
-
-	passwordAttribute, ok := attributes["password"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`password is missing from object`)
-
-		return nil, diags
-	}
-
-	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
-	}
-
-	urlAttribute, ok := attributes["url"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`url is missing from object`)
-
-		return nil, diags
-	}
-
-	urlVal, ok := urlAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
-	}
-
-	usernameAttribute, ok := attributes["username"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`username is missing from object`)
-
-		return nil, diags
-	}
-
-	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
-	}
-
-	webhookSidAttribute, ok := attributes["webhook_sid"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`webhook_sid is missing from object`)
-
-		return nil, diags
-	}
-
-	webhookSidVal, ok := webhookSidAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`webhook_sid expected to be basetypes.StringValue, was: %T`, webhookSidAttribute))
-	}
-
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	return MessagingHookValue{
-		Method:     methodVal,
-		Password:   passwordVal,
-		Url:        urlVal,
-		Username:   usernameVal,
-		WebhookSid: webhookSidVal,
-		state:      attr.ValueStateKnown,
-	}, diags
-}
-
-func NewMessagingHookValueNull() MessagingHookValue {
-	return MessagingHookValue{
-		state: attr.ValueStateNull,
-	}
-}
-
-func NewMessagingHookValueUnknown() MessagingHookValue {
-	return MessagingHookValue{
-		state: attr.ValueStateUnknown,
-	}
-}
-
-func NewMessagingHookValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (MessagingHookValue, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
-	ctx := context.Background()
-
-	for name, attributeType := range attributeTypes {
-		attribute, ok := attributes[name]
-
-		if !ok {
-			diags.AddError(
-				"Missing MessagingHookValue Attribute Value",
-				"While creating a MessagingHookValue value, a missing attribute value was detected. "+
-					"A MessagingHookValue must contain values for all attributes, even if null or unknown. "+
-					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("MessagingHookValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
-			)
-
-			continue
-		}
-
-		if !attributeType.Equal(attribute.Type(ctx)) {
-			diags.AddError(
-				"Invalid MessagingHookValue Attribute Type",
-				"While creating a MessagingHookValue value, an invalid attribute value was detected. "+
-					"A MessagingHookValue must use a matching attribute type for the value. "+
-					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("MessagingHookValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
-					fmt.Sprintf("MessagingHookValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
-			)
-		}
-	}
-
-	for name := range attributes {
-		_, ok := attributeTypes[name]
-
-		if !ok {
-			diags.AddError(
-				"Extra MessagingHookValue Attribute Value",
-				"While creating a MessagingHookValue value, an extra attribute value was detected. "+
-					"A MessagingHookValue must not contain values beyond the expected attribute types. "+
-					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("Extra MessagingHookValue Attribute Name: %s", name),
-			)
-		}
-	}
-
-	if diags.HasError() {
-		return NewMessagingHookValueUnknown(), diags
-	}
-
-	methodAttribute, ok := attributes["method"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`method is missing from object`)
-
-		return NewMessagingHookValueUnknown(), diags
-	}
-
-	methodVal, ok := methodAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`method expected to be basetypes.StringValue, was: %T`, methodAttribute))
-	}
-
-	passwordAttribute, ok := attributes["password"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`password is missing from object`)
-
-		return NewMessagingHookValueUnknown(), diags
-	}
-
-	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
-	}
-
-	urlAttribute, ok := attributes["url"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`url is missing from object`)
-
-		return NewMessagingHookValueUnknown(), diags
-	}
-
-	urlVal, ok := urlAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
-	}
-
-	usernameAttribute, ok := attributes["username"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`username is missing from object`)
-
-		return NewMessagingHookValueUnknown(), diags
-	}
-
-	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
-	}
-
-	webhookSidAttribute, ok := attributes["webhook_sid"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`webhook_sid is missing from object`)
-
-		return NewMessagingHookValueUnknown(), diags
-	}
-
-	webhookSidVal, ok := webhookSidAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`webhook_sid expected to be basetypes.StringValue, was: %T`, webhookSidAttribute))
-	}
-
-	if diags.HasError() {
-		return NewMessagingHookValueUnknown(), diags
-	}
-
-	return MessagingHookValue{
-		Method:     methodVal,
-		Password:   passwordVal,
-		Url:        urlVal,
-		Username:   usernameVal,
-		WebhookSid: webhookSidVal,
-		state:      attr.ValueStateKnown,
-	}, diags
-}
-
-func NewMessagingHookValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) MessagingHookValue {
-	object, diags := NewMessagingHookValue(attributeTypes, attributes)
-
-	if diags.HasError() {
-		// This could potentially be added to the diag package.
-		diagsStrings := make([]string, 0, len(diags))
-
-		for _, diagnostic := range diags {
-			diagsStrings = append(diagsStrings, fmt.Sprintf(
-				"%s | %s | %s",
-				diagnostic.Severity(),
-				diagnostic.Summary(),
-				diagnostic.Detail()))
-		}
-
-		panic("NewMessagingHookValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
-	}
-
-	return object
-}
-
-func (t MessagingHookType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
-	if in.Type() == nil {
-		return NewMessagingHookValueNull(), nil
-	}
-
-	if !in.Type().Equal(t.TerraformType(ctx)) {
-		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
-	}
-
-	if !in.IsKnown() {
-		return NewMessagingHookValueUnknown(), nil
-	}
-
-	if in.IsNull() {
-		return NewMessagingHookValueNull(), nil
-	}
-
-	attributes := map[string]attr.Value{}
-
-	val := map[string]tftypes.Value{}
-
-	err := in.As(&val)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for k, v := range val {
-		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
-
-		if err != nil {
-			return nil, err
-		}
-
-		attributes[k] = a
-	}
-
-	return NewMessagingHookValueMust(MessagingHookValue{}.AttributeTypes(ctx), attributes), nil
-}
-
-func (t MessagingHookType) ValueType(ctx context.Context) attr.Value {
-	return MessagingHookValue{}
-}
-
-var _ basetypes.ObjectValuable = MessagingHookValue{}
-
-type MessagingHookValue struct {
-	Method     basetypes.StringValue `tfsdk:"method"`
-	Password   basetypes.StringValue `tfsdk:"password"`
-	Url        basetypes.StringValue `tfsdk:"url"`
-	Username   basetypes.StringValue `tfsdk:"username"`
-	WebhookSid basetypes.StringValue `tfsdk:"webhook_sid"`
-	state      attr.ValueState
-}
-
-func (v MessagingHookValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 5)
-
-	var val tftypes.Value
-	var err error
-
-	attrTypes["method"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["url"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["username"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["webhook_sid"] = basetypes.StringType{}.TerraformType(ctx)
-
-	objectType := tftypes.Object{AttributeTypes: attrTypes}
-
-	switch v.state {
-	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 5)
-
-		val, err = v.Method.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["method"] = val
-
-		val, err = v.Password.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["password"] = val
-
-		val, err = v.Url.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["url"] = val
-
-		val, err = v.Username.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["username"] = val
-
-		val, err = v.WebhookSid.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["webhook_sid"] = val
-
-		if err := tftypes.ValidateValue(objectType, vals); err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		return tftypes.NewValue(objectType, vals), nil
-	case attr.ValueStateNull:
-		return tftypes.NewValue(objectType, nil), nil
-	case attr.ValueStateUnknown:
-		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
-	default:
-		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
-	}
-}
-
-func (v MessagingHookValue) IsNull() bool {
-	return v.state == attr.ValueStateNull
-}
-
-func (v MessagingHookValue) IsUnknown() bool {
-	return v.state == attr.ValueStateUnknown
-}
-
-func (v MessagingHookValue) String() string {
-	return "MessagingHookValue"
-}
-
-func (v MessagingHookValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	attributeTypes := map[string]attr.Type{
-		"method":      basetypes.StringType{},
-		"password":    basetypes.StringType{},
-		"url":         basetypes.StringType{},
-		"username":    basetypes.StringType{},
-		"webhook_sid": basetypes.StringType{},
-	}
-
-	if v.IsNull() {
-		return types.ObjectNull(attributeTypes), diags
-	}
-
-	if v.IsUnknown() {
-		return types.ObjectUnknown(attributeTypes), diags
-	}
-
-	objVal, diags := types.ObjectValue(
-		attributeTypes,
-		map[string]attr.Value{
-			"method":      v.Method,
-			"password":    v.Password,
-			"url":         v.Url,
-			"username":    v.Username,
-			"webhook_sid": v.WebhookSid,
-		})
-
-	return objVal, diags
-}
-
-func (v MessagingHookValue) Equal(o attr.Value) bool {
-	other, ok := o.(MessagingHookValue)
-
-	if !ok {
-		return false
-	}
-
-	if v.state != other.state {
-		return false
-	}
-
-	if v.state != attr.ValueStateKnown {
-		return true
-	}
-
-	if !v.Method.Equal(other.Method) {
-		return false
-	}
-
-	if !v.Password.Equal(other.Password) {
-		return false
-	}
-
-	if !v.Url.Equal(other.Url) {
-		return false
-	}
-
-	if !v.Username.Equal(other.Username) {
-		return false
-	}
-
-	if !v.WebhookSid.Equal(other.WebhookSid) {
-		return false
-	}
-
-	return true
-}
-
-func (v MessagingHookValue) Type(ctx context.Context) attr.Type {
-	return MessagingHookType{
-		basetypes.ObjectType{
-			AttrTypes: v.AttributeTypes(ctx),
-		},
-	}
-}
-
-func (v MessagingHookValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"method":      basetypes.StringType{},
 		"password":    basetypes.StringType{},

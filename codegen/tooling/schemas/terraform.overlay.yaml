@@ -26,6 +26,35 @@ actions:
     update:
       operationId: listPhoneNumbers
 
+  # And one the spec omits entirely. lib/routes/api/applications.js serves
+  # GET /Applications/:sid, but jambonz's swagger documents only the list, the
+  # create, the update and the delete -- so cmd/gen fails with
+  #
+  #   resource "application": the spec declares no operation with
+  #   operationId "getApplication"
+  #
+  # Every resource needs a read: create answers with a bare sid, so the record
+  # is fetched back before apply returns. Declaring the operation the server
+  # already implements is the smallest true statement; the alternative is
+  # listing every application and filtering client-side for one row.
+  - target: $.paths['/Applications/{ApplicationSid}']
+    description: The single-application GET the implementation serves and the spec omits
+    update:
+      get:
+        tags:
+          - Applications
+        summary: retrieve an application
+        operationId: getApplication
+        responses:
+          '200':
+            description: application found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Application'
+          '404':
+            description: application not found
+
   # ---- what the server owns ------------------------------------------------
   #
   # A readOnly property becomes a computed Terraform attribute, and cmd/gen never
@@ -84,16 +113,6 @@ actions:
     update:
       format: password
 
-  - target: $.components.schemas.VoipCarrier.properties.smpp_password
-    description: SMPP outbound bind secret
-    update:
-      format: password
-
-  - target: $.components.schemas.VoipCarrier.properties.smpp_inbound_password
-    description: SMPP inbound bind secret
-    update:
-      format: password
-
   - target: $.paths['/VoipCarriers'].post.requestBody.content['application/json'].schema.properties.register_password
     description: SIP registration secret
     update:
@@ -147,19 +166,6 @@ actions:
     update:
       is_active:
         type: boolean
-      smpp_system_id:
-        type: string
-      smpp_password:
-        type: string
-        format: password
-      smpp_inbound_system_id:
-        type: string
-      smpp_inbound_password:
-        type: string
-        format: password
-      smpp_enquire_link_interval:
-        type: number
-        format: integer
 
   - target: $.paths['/Accounts'].post.requestBody.content['application/json'].schema.properties
     description: The Account record carries device_calling_application_sid; the create body omitted it

@@ -13,7 +13,8 @@ func PhoneNumberResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"account_sid": schema.StringAttribute{
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"application_sid": schema.StringAttribute{
 				Optional: true,

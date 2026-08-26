@@ -171,55 +171,34 @@
 						}
 					},
 					{
-						"name": "messaging_hook",
-						"single_nested": {
-							"attributes": [
-								{
-									"name": "method",
-									"string": {
-										"computed_optional_required": "computed"
-									}
-								},
-								{
-									"name": "password",
-									"string": {
-										"computed_optional_required": "computed",
-										"sensitive": true
-									}
-								},
-								{
-									"name": "url",
-									"string": {
-										"computed_optional_required": "computed"
-									}
-								},
-								{
-									"name": "username",
-									"string": {
-										"computed_optional_required": "computed"
-									}
-								},
-								{
-									"name": "webhook_sid",
-									"string": {
-										"computed_optional_required": "computed"
-									}
-								}
-							],
-							"computed_optional_required": "computed"
-						}
-					},
-					{
 						"name": "name",
 						"string": {
 							"computed_optional_required": "computed"
 						}
 					},
 					{
-						"int64": {
+						"name": "speech_recognizer_language",
+						"string": {
 							"computed_optional_required": "computed"
-						},
-						"name": "record_all_calls"
+						}
+					},
+					{
+						"name": "speech_recognizer_vendor",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "speech_synthesis_vendor",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "speech_synthesis_voice",
+						"string": {
+							"computed_optional_required": "computed"
+						}
 					}
 				]
 			}
@@ -429,38 +408,6 @@
 						"name": "requires_register"
 					},
 					{
-						"name": "smpp_enquire_link_interval",
-						"number": {
-							"computed_optional_required": "computed"
-						}
-					},
-					{
-						"name": "smpp_inbound_password",
-						"string": {
-							"computed_optional_required": "computed",
-							"sensitive": true
-						}
-					},
-					{
-						"name": "smpp_inbound_system_id",
-						"string": {
-							"computed_optional_required": "computed"
-						}
-					},
-					{
-						"name": "smpp_password",
-						"string": {
-							"computed_optional_required": "computed",
-							"sensitive": true
-						}
-					},
-					{
-						"name": "smpp_system_id",
-						"string": {
-							"computed_optional_required": "computed"
-						}
-					},
-					{
 						"name": "tech_prefix",
 						"string": {
 							"computed_optional_required": "computed"
@@ -499,9 +446,6 @@
 									"name": "method",
 									"string": {
 										"computed_optional_required": "computed_optional",
-										"default": {
-											"static": "POST"
-										},
 										"validators": [
 											{
 												"custom": {
@@ -510,7 +454,7 @@
 															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 														}
 													],
-													"schema_definition": "stringvalidator.OneOf(\n\"GET\",\n\"POST\",\n)"
+													"schema_definition": "stringvalidator.OneOf(\n\"get\",\n\"post\",\n)"
 												}
 											}
 										]
@@ -519,7 +463,7 @@
 								{
 									"name": "password",
 									"string": {
-										"computed_optional_required": "required",
+										"computed_optional_required": "computed_optional",
 										"sensitive": true
 									}
 								},
@@ -532,7 +476,7 @@
 								{
 									"name": "username",
 									"string": {
-										"computed_optional_required": "required"
+										"computed_optional_required": "computed_optional"
 									}
 								},
 								{
@@ -578,6 +522,13 @@
 						}
 					},
 					{
+						"name": "app_json",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "Voice Application Json, call_hook will not be invoked if app_json is provided"
+						}
+					},
+					{
 						"name": "call_hook",
 						"single_nested": {
 							"attributes": [
@@ -585,9 +536,6 @@
 									"name": "method",
 									"string": {
 										"computed_optional_required": "computed_optional",
-										"default": {
-											"static": "POST"
-										},
 										"validators": [
 											{
 												"custom": {
@@ -596,7 +544,7 @@
 															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 														}
 													],
-													"schema_definition": "stringvalidator.OneOf(\n\"GET\",\n\"POST\",\n)"
+													"schema_definition": "stringvalidator.OneOf(\n\"get\",\n\"post\",\n)"
 												}
 											}
 										]
@@ -605,7 +553,7 @@
 								{
 									"name": "password",
 									"string": {
-										"computed_optional_required": "required",
+										"computed_optional_required": "computed_optional",
 										"sensitive": true
 									}
 								},
@@ -618,7 +566,7 @@
 								{
 									"name": "username",
 									"string": {
-										"computed_optional_required": "required"
+										"computed_optional_required": "computed_optional"
 									}
 								},
 								{
@@ -639,9 +587,6 @@
 									"name": "method",
 									"string": {
 										"computed_optional_required": "computed_optional",
-										"default": {
-											"static": "POST"
-										},
 										"validators": [
 											{
 												"custom": {
@@ -650,7 +595,7 @@
 															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 														}
 													],
-													"schema_definition": "stringvalidator.OneOf(\n\"GET\",\n\"POST\",\n)"
+													"schema_definition": "stringvalidator.OneOf(\n\"get\",\n\"post\",\n)"
 												}
 											}
 										]
@@ -658,62 +603,8 @@
 								},
 								{
 									"name": "password",
-									"string": {
-										"computed_optional_required": "required",
-										"sensitive": true
-									}
-								},
-								{
-									"name": "url",
-									"string": {
-										"computed_optional_required": "required"
-									}
-								},
-								{
-									"name": "username",
-									"string": {
-										"computed_optional_required": "required"
-									}
-								},
-								{
-									"name": "webhook_sid",
-									"string": {
-										"computed_optional_required": "computed_optional"
-									}
-								}
-							],
-							"computed_optional_required": "required"
-						}
-					},
-					{
-						"name": "messaging_hook",
-						"single_nested": {
-							"attributes": [
-								{
-									"name": "method",
 									"string": {
 										"computed_optional_required": "computed_optional",
-										"default": {
-											"static": "POST"
-										},
-										"validators": [
-											{
-												"custom": {
-													"imports": [
-														{
-															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-														}
-													],
-													"schema_definition": "stringvalidator.OneOf(\n\"GET\",\n\"POST\",\n)"
-												}
-											}
-										]
-									}
-								},
-								{
-									"name": "password",
-									"string": {
-										"computed_optional_required": "required",
 										"sensitive": true
 									}
 								},
@@ -726,7 +617,7 @@
 								{
 									"name": "username",
 									"string": {
-										"computed_optional_required": "required"
+										"computed_optional_required": "computed_optional"
 									}
 								},
 								{
@@ -747,22 +638,28 @@
 						}
 					},
 					{
-						"int64": {
-							"computed_optional_required": "required",
-							"validators": [
-								{
-									"custom": {
-										"imports": [
-											{
-												"path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-											}
-										],
-										"schema_definition": "int64validator.OneOf(\n0,\n1,\n)"
-									}
-								}
-							]
-						},
-						"name": "record_all_calls"
+						"name": "speech_recognizer_language",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "speech_recognizer_vendor",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "speech_synthesis_vendor",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "speech_synthesis_voice",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
 					},
 					{
 						"name": "application_sid",
@@ -780,7 +677,7 @@
 					{
 						"name": "account_sid",
 						"string": {
-							"computed_optional_required": "required"
+							"computed_optional_required": "computed_optional"
 						}
 					},
 					{
@@ -988,38 +885,6 @@
 							"description": "wehther this provider requires us to send a REGISTER to them in order to receive calls"
 						},
 						"name": "requires_register"
-					},
-					{
-						"name": "smpp_enquire_link_interval",
-						"number": {
-							"computed_optional_required": "computed_optional"
-						}
-					},
-					{
-						"name": "smpp_inbound_password",
-						"string": {
-							"computed_optional_required": "computed_optional",
-							"sensitive": true
-						}
-					},
-					{
-						"name": "smpp_inbound_system_id",
-						"string": {
-							"computed_optional_required": "computed_optional"
-						}
-					},
-					{
-						"name": "smpp_password",
-						"string": {
-							"computed_optional_required": "computed_optional",
-							"sensitive": true
-						}
-					},
-					{
-						"name": "smpp_system_id",
-						"string": {
-							"computed_optional_required": "computed_optional"
-						}
 					},
 					{
 						"name": "tech_prefix",

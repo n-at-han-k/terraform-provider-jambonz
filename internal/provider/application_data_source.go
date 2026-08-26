@@ -100,14 +100,16 @@ func (d *applicationDataSource) apply(ctx context.Context, data *datasource_appl
 	data.ApplicationSid = uuidPointerValue(p.ApplicationSid)
 	data.AccountSid = uuidValue(p.AccountSid)
 
-	{
+	if p.CallHook == nil {
+		data.CallHook = datasource_application.NewCallHookValueNull()
+	} else {
 		callHook, d := datasource_application.NewCallHookValue(
 			data.CallHook.AttributeTypes(ctx),
 			map[string]attr.Value{
-				"method":      types.StringValue(string(p.CallHook.Method)),
-				"password":    types.StringValue(string(p.CallHook.Password)),
+				"method":      types.StringPointerValue((*string)(p.CallHook.Method)),
+				"password":    types.StringPointerValue((*string)(p.CallHook.Password)),
 				"url":         types.StringValue(string(p.CallHook.Url)),
-				"username":    types.StringValue(string(p.CallHook.Username)),
+				"username":    types.StringPointerValue((*string)(p.CallHook.Username)),
 				"webhook_sid": uuidPointerValue(p.CallHook.WebhookSid),
 			},
 		)
@@ -115,35 +117,25 @@ func (d *applicationDataSource) apply(ctx context.Context, data *datasource_appl
 		data.CallHook = callHook
 	}
 
-	{
+	if p.CallStatusHook == nil {
+		data.CallStatusHook = datasource_application.NewCallStatusHookValueNull()
+	} else {
 		callStatusHook, d := datasource_application.NewCallStatusHookValue(
 			data.CallStatusHook.AttributeTypes(ctx),
 			map[string]attr.Value{
-				"method":      types.StringValue(string(p.CallStatusHook.Method)),
-				"password":    types.StringValue(string(p.CallStatusHook.Password)),
+				"method":      types.StringPointerValue((*string)(p.CallStatusHook.Method)),
+				"password":    types.StringPointerValue((*string)(p.CallStatusHook.Password)),
 				"url":         types.StringValue(string(p.CallStatusHook.Url)),
-				"username":    types.StringValue(string(p.CallStatusHook.Username)),
+				"username":    types.StringPointerValue((*string)(p.CallStatusHook.Username)),
 				"webhook_sid": uuidPointerValue(p.CallStatusHook.WebhookSid),
 			},
 		)
 		diags.Append(d...)
 		data.CallStatusHook = callStatusHook
 	}
-
-	{
-		messagingHook, d := datasource_application.NewMessagingHookValue(
-			data.MessagingHook.AttributeTypes(ctx),
-			map[string]attr.Value{
-				"method":      types.StringValue(string(p.MessagingHook.Method)),
-				"password":    types.StringValue(string(p.MessagingHook.Password)),
-				"url":         types.StringValue(string(p.MessagingHook.Url)),
-				"username":    types.StringValue(string(p.MessagingHook.Username)),
-				"webhook_sid": uuidPointerValue(p.MessagingHook.WebhookSid),
-			},
-		)
-		diags.Append(d...)
-		data.MessagingHook = messagingHook
-	}
 	data.Name = types.StringValue(string(p.Name))
-	data.RecordAllCalls = types.Int64Value(int64(p.RecordAllCalls))
+	data.SpeechRecognizerLanguage = types.StringPointerValue((*string)(p.SpeechRecognizerLanguage))
+	data.SpeechRecognizerVendor = types.StringPointerValue((*string)(p.SpeechRecognizerVendor))
+	data.SpeechSynthesisVendor = types.StringPointerValue((*string)(p.SpeechSynthesisVendor))
+	data.SpeechSynthesisVoice = types.StringPointerValue((*string)(p.SpeechSynthesisVoice))
 }

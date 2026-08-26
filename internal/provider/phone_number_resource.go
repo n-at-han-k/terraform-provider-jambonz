@@ -29,7 +29,6 @@ import (
 var (
 	_ resource.Resource                = (*phoneNumberResource)(nil)
 	_ resource.ResourceWithImportState = (*phoneNumberResource)(nil)
-	_ resource.ResourceWithModifyPlan  = (*phoneNumberResource)(nil)
 )
 
 func NewPhoneNumberResource() resource.Resource { return &phoneNumberResource{} }
@@ -79,7 +78,7 @@ func (r *phoneNumberResource) Create(ctx context.Context, req resource.CreateReq
 	// as optional. Every property the overlay marked readOnly is not a property of
 	// this body at all, so server-owned values are never sent.
 	body := jambonzapi.CreatePhoneNumberJSONRequestBody{}
-	setUUID(&body.AccountSid, data.AccountSid)
+	setUUIDPtr(&body.AccountSid, data.AccountSid)
 	setUUIDPtr(&body.ApplicationSid, data.ApplicationSid)
 	setString(&body.Number, data.Number)
 	setUUID(&body.VoipCarrierSid, data.VoipCarrierSid)
@@ -157,8 +156,10 @@ func (r *phoneNumberResource) Update(ctx context.Context, req resource.UpdateReq
 	// overlay marks it readOnly, so it is not sent here, and this API rejects a
 	// body that carries it.
 	body := jambonzapi.UpdatePhoneNumberJSONRequestBody{}
-	setUUID(&body.AccountSid, plan.AccountSid)
-	setUUID(&body.ApplicationSid, plan.ApplicationSid)
+	setUUIDPtr(&body.AccountSid, plan.AccountSid)
+	setUUIDPtr(&body.ApplicationSid, plan.ApplicationSid)
+	setString(&body.Number, plan.Number)
+	setUUID(&body.VoipCarrierSid, plan.VoipCarrierSid)
 
 	id := plan.PhoneNumberSid.ValueString()
 	api, err := r.client.UpdatePhoneNumberWithResponse(ctx, id, body)
@@ -213,33 +214,6 @@ func (r *phoneNumberResource) Delete(ctx context.Context, req resource.DeleteReq
 //	terraform import jambonz_phone_number.x 9d26a637-1679-471f-8da8-7150266e1254
 func (r *phoneNumberResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("phone_number_sid"), req, resp)
-}
-
-// ModifyPlan forces replacement for the attributes the create body accepts and
-// the update body does not.
-//
-// Without it those attributes are settable, and changing one plans as an in-place
-// update that sends a body with no such property — the API stores nothing, the
-// apply reports success, and the next read shows the old value back. Which
-// attributes these are is not a judgement: it is the difference between the two
-// bodies, read from the spec.
-func (r *phoneNumberResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	// Nothing to force on a create (no state) or a destroy (no plan).
-	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
-		return
-	}
-	var plan, state resource_phone_number.PhoneNumberModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	if !plan.Number.Equal(state.Number) {
-		resp.RequiresReplace = append(resp.RequiresReplace, path.Root("number"))
-	}
-	if !plan.VoipCarrierSid.Equal(state.VoipCarrierSid) {
-		resp.RequiresReplace = append(resp.RequiresReplace, path.Root("voip_carrier_sid"))
-	}
 }
 
 // fetch reads the record addressed by data.PhoneNumberSid and copies it onto data.

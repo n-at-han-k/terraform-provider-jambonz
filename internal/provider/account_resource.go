@@ -84,10 +84,10 @@ func (r *accountResource) Create(ctx context.Context, req resource.CreateRequest
 
 	if !data.RegistrationHook.IsNull() && !data.RegistrationHook.IsUnknown() {
 		registrationHook := ensure(&body.RegistrationHook)
-		setString(&registrationHook.Method, data.RegistrationHook.Method)
-		setString(&registrationHook.Password, data.RegistrationHook.Password)
+		setStringPtr(&registrationHook.Method, data.RegistrationHook.Method)
+		setStringPtr(&registrationHook.Password, data.RegistrationHook.Password)
 		setString(&registrationHook.Url, data.RegistrationHook.Url)
-		setString(&registrationHook.Username, data.RegistrationHook.Username)
+		setStringPtr(&registrationHook.Username, data.RegistrationHook.Username)
 	}
 	setUUID(&body.ServiceProviderSid, data.ServiceProviderSid)
 	setStringPtr(&body.SipRealm, data.SipRealm)
@@ -170,10 +170,10 @@ func (r *accountResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	if !plan.RegistrationHook.IsNull() && !plan.RegistrationHook.IsUnknown() {
 		registrationHook := ensure(&body.RegistrationHook)
-		setString(&registrationHook.Method, plan.RegistrationHook.Method)
-		setString(&registrationHook.Password, plan.RegistrationHook.Password)
+		setStringPtr(&registrationHook.Method, plan.RegistrationHook.Method)
+		setStringPtr(&registrationHook.Password, plan.RegistrationHook.Password)
 		setString(&registrationHook.Url, plan.RegistrationHook.Url)
-		setString(&registrationHook.Username, plan.RegistrationHook.Username)
+		setStringPtr(&registrationHook.Username, plan.RegistrationHook.Username)
 	}
 	setUUID(&body.ServiceProviderSid, plan.ServiceProviderSid)
 	setStringPtr(&body.SipRealm, plan.SipRealm)
@@ -269,10 +269,10 @@ func (r *accountResource) apply(ctx context.Context, data *resource_account.Acco
 		registrationHook, d := resource_account.NewRegistrationHookValue(
 			data.RegistrationHook.AttributeTypes(ctx),
 			map[string]attr.Value{
-				"method":      types.StringValue(string(p.RegistrationHook.Method)),
-				"password":    types.StringValue(string(p.RegistrationHook.Password)),
+				"method":      types.StringPointerValue((*string)(p.RegistrationHook.Method)),
+				"password":    types.StringPointerValue((*string)(p.RegistrationHook.Password)),
 				"url":         types.StringValue(string(p.RegistrationHook.Url)),
-				"username":    types.StringValue(string(p.RegistrationHook.Username)),
+				"username":    types.StringPointerValue((*string)(p.RegistrationHook.Username)),
 				"webhook_sid": uuidPointerValue(p.RegistrationHook.WebhookSid),
 			},
 		)

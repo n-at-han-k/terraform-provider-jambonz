@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   title: Jambonz REST API
   description: Jambonz REST API specification
@@ -29,11 +29,9 @@ tags:
   - name: SBCs
     description: SBCs operations
   - name: Voip Carriers
-    description: Voip Carriers operations
+    description: Voip Carriers operations   
   - name: Sip Gateways
     description: Sip Gateways operations
-  - name: Smpp Gateways
-    description: Smpp Gateways operations
   - name: Webhooks
     description: Webhooks operations
   - name: Microsoft Teams Tenants
@@ -130,7 +128,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GeneralError'
+                $ref: '#/components/schemas/GeneralError'      
   /Sbcs:
     post:
       tags:
@@ -192,11 +190,10 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
                   properties:
                     ipv4:
                       type: string
-                      description: ip address of one of our Sbcs
+                      description: ip address of one of our Sbcs 
                   required:
                     - ipv4
         500:
@@ -216,53 +213,12 @@ paths:
         tags:
           - SBCs
         summary: delete SBC address
-        operationId: deleteSbcAddress
+        operationId: deleteSbcAddress      
         responses:
           200:
             description: sbc address deleted
           404:
             description: sbc address not found
-  /Smpps:
-    get:
-      summary: retrieve public IP addresses of the jambonz smpp servers
-      operationId: listSmpps
-      parameters:
-        - in: query
-          name: service_provider_sid
-          required: false
-          schema:
-            type: string
-            description: return only the smpp servers operated for the sole use of this service provider
-      responses:
-        200:
-          description: list of smpp server addresses
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    ipv4:
-                      type: string
-                      description: ip address of one of our Sbcs
-                    port:
-                      type: number
-                    use_tls:
-                      type: boolean
-                    is_primary:
-                      type: boolean
-                  required:
-                    - ipv4
-                    - port
-                    - use_tls
-                    - is_primary
-        500:
-          description: system error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
   /InviteCodes:
     post:
       summary: validate an invite code
@@ -282,7 +238,7 @@ paths:
           description: code successfully validated
         404:
           description: code not found
-
+        
   /ApiKeys:
     post:
       tags:
@@ -335,7 +291,7 @@ paths:
         tags:
           - Api Keys
         summary: delete api key
-        operationId: deleteApiKey
+        operationId: deleteApiKey          
         responses:
           200:
             description: api key deleted
@@ -401,7 +357,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessfulLogin'
+                $ref: '#/components/schemas/SuccessfulLogin' 
         500:
           description: system error
           content:
@@ -564,7 +520,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneralError'
               example:
-                msg: invalid service_provider_sid
+                msg: invalid service_provider_sid   
         403:
           description: invalid/expired oauth2 code
           content:
@@ -667,7 +623,7 @@ paths:
               properties:
                 name:
                   type: string
-                email:
+                email: 
                   type: string
                 email_activation_code:
                   type: string
@@ -715,7 +671,7 @@ paths:
               properties:
                 name:
                   type: string
-                email:
+                email: 
                   type: string
                 is_active:
                   type: boolean
@@ -846,7 +802,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  stripe_customer_id:
+                  stripe_customer_id: 
                     type: string
                 required:
                   - stripe_customer_id
@@ -890,12 +846,11 @@ paths:
                 products:
                   type: array
                   items:
-                    type: object
                     properties:
                       product_sid:
                         type: string
                       price_id:
-                        type: string
+                        type: string 
                       quantity:
                         type: number
                         format: integer
@@ -930,7 +885,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneralError'
-
+    
   /ActivationCode:
     post:
       tags:
@@ -1147,7 +1102,7 @@ paths:
                 diversion:
                   type: string
                   description: Diversion header or phone number to apply to outbound calls
-              required:
+              required: 
                 - name
       responses:
         201:
@@ -1313,7 +1268,7 @@ paths:
                   type: boolean
                 outbound:
                   type: boolean
-              required:
+              required: 
                 - voip_carrier_sid
                 - ipv4
       responses:
@@ -1440,156 +1395,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneralError'
-  /SmppGateways:
-    post:
-      tags:
-        - Smpp Gateways
-      summary: create smpp gateway
-      operationId: createSmppGateway
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                voip_carrier_sid:
-                  type: string
-                  description: voip carrier that provides this gateway
-                  format: uuid
-                ipv4:
-                  type: string
-                port:
-                  type: number
-                netmask:
-                  type: number
-                inbound:
-                  type: boolean
-                outbound:
-                  type: boolean
-                is_primary:
-                  type: boolean
-                use_tls:
-                  type: boolean
-              required:
-                - voip_carrier_sid
-                - ipv4
-      responses:
-        201:
-          description: smpp gateway successfully created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessfulAdd'
-        400:
-          description: bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
-        422:
-          description: unprocessable entity
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
-        500:
-          description: system error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
-    get:
-      tags:
-        - Smpp Gateways
-      summary: list smpp gateways
-      operationId: listSmppGateways
-      responses:
-        200:
-          description: list of smpp gateways
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SmppGateway'
-        500:
-          description: system error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
-  /SmppGateways/{SmppGatewaySid}:
-    parameters:
-      - name: SmppGatewaySid
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-    delete:
-      tags:
-        - Smpp Gateways
-      summary: delete a smpp gateway
-      operationId: deleteSmppGateway
-      responses:
-        204:
-          description: smpp gateway successfully deleted
-        404:
-          description: smpp gateway not found
-        500:
-          description: system error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
-    get:
-      tags:
-        - Smpp Gateways
-      summary: retrieve smpp gateway
-      operationId: getSmppGateway
-      responses:
-        200:
-          description: smpp gateway found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SmppGateway'
-        404:
-          description: smpp gateway not found
-        500:
-          description: system error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
-    put:
-      tags:
-        - Smpp Gateways
-      summary: update smpp gateway
-      operationId: updateSmppGateway
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SmppGateway'
-      responses:
-        204:
-          description: smpp gateway updated
-        400:
-          description: bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
-        404:
-          description: smpp gateway not found
-        500:
-          description: system error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeneralError'
   /PhoneNumbers:
     post:
       tags:
@@ -1597,7 +1402,6 @@ paths:
       summary: provision a phone number into inventory from a Voip Carrier
       operationId: provisionPhoneNumber
       requestBody:
-        required: true
         content:
           application/json:
             schema:
@@ -1615,8 +1419,7 @@ paths:
                 voip_carrier_sid:
                   type: string
                   format: uuid
-              required:
-                - account_sid
+              required: 
                 - number
                 - voip_carrier_sid
       responses:
@@ -1729,30 +1532,17 @@ paths:
       summary: update phone number
       operationId: updatePhoneNumber
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                account_sid:
-                  type: string
-                  format: uuid
-                application_sid:
-                  type: string
-                  format: uuid
-                  nullable: true
-              required:
-                - account_sid
-                - application_sid
+              $ref: '#/components/schemas/PhoneNumber'
       responses:
         204:
           description: phone number updated
-          # This actually returns no content
-          # content:
-          #   application/json:
-          #     schema:
-          #       $ref: '#/components/schemas/VoipCarrier'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoipCarrier'
         400:
           description: bad request
           content:
@@ -1767,7 +1557,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneralError'
-
+  
   /ServiceProviders:
     post:
       tags:
@@ -1797,7 +1587,7 @@ paths:
                   type: string
                   description: SBC domain name for Microsoft Teams
                   example: contoso.com
-              required:
+              required: 
                 - name
       responses:
         201:
@@ -1886,7 +1676,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneralError'
-
+                
     put:
       tags:
         - Service Providers
@@ -2173,8 +1963,8 @@ paths:
                     properties:
                       status:
                         type: string
-                        enum:
-                            - success
+                        enum: 
+                            - success 
                             - fail
                             - not tested
                       reason:
@@ -2184,8 +1974,8 @@ paths:
                     properties:
                       status:
                         type: string
-                        enum:
-                            - success
+                        enum: 
+                            - success 
                             - fail
                       reason:
                         type: string
@@ -2375,7 +2165,7 @@ paths:
                 $ref: '#/components/schemas/GeneralError'
   /MicrosoftTeamsTenants:
     post:
-      tags:
+      tags: 
         - Microsoft Teams Tenants
       summary: provision a customer tenant for MS Teams
       operationId: createMsTeamsTenant
@@ -2424,7 +2214,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneralError'
     get:
-      tags:
+      tags: 
         - Microsoft Teams Tenants
       summary: list MS Teams tenants
       operationId: listMsTeamsTenants
@@ -2452,7 +2242,7 @@ paths:
           type: string
           format: uuid
     delete:
-      tags:
+      tags: 
         - Microsoft Teams Tenants
       summary: delete an MS Teams tenant
       operationId: deleteTenant
@@ -2468,7 +2258,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneralError'
     get:
-      tags:
+      tags: 
         - Microsoft Teams Tenants
       summary: retrieve an MS Teams tenant
       operationId: getTenant
@@ -2489,7 +2279,7 @@ paths:
                 $ref: '#/components/schemas/GeneralError'
 
     put:
-      tags:
+      tags: 
         - Microsoft Teams Tenants
       summary: update an MS Teams tenant
       operationId: putTenant
@@ -2547,7 +2337,7 @@ paths:
                   type: string
                   format: uuid
                   example: 85f9c036-ba61-4f28-b2f5-617c23fa68ff
-              required:
+              required: 
                 - name
                 - service_provider_sid
       responses:
@@ -2582,7 +2372,7 @@ paths:
             post:
               requestBody:
                 description: |
-                  provides details of the authentication request.  The receiving server is responsible for authenticating the
+                  provides details of the authentication request.  The receiving server is responsible for authenticating the 
                   request as per [RFC 2617](https://tools.ietf.org/html/rfc2617)
                 content:
                   application/json:
@@ -2633,7 +2423,7 @@ paths:
                         qop:
                           type: string
                           description: qop value
-                          example: auth
+                          example: auth 
                         cnonce:
                           type: string
                           description: cnonce value
@@ -2650,8 +2440,8 @@ paths:
                 '200':
                   description: |
                     Your callback should return this HTTP status code in all cases.
-                    if the request was authenticated and you wish to admit
-                    the client to the network, this is indicated by setting the 'response'
+                    if the request was authenticated and you wish to admit 
+                    the client to the network, this is indicated by setting the 'response' 
                     attribute in the body to 'ok'
                   content:
                     application/json:
@@ -2684,7 +2474,7 @@ paths:
                           blacklist:
                             type: number
                             description: |
-                              If provided, represents a period in seconds during which the source IP
+                              If provided, represents a period in seconds during which the source IP 
                               address should be blacklisted by the platform (0 means forever).
 
     get:
@@ -3068,8 +2858,8 @@ paths:
                     properties:
                       status:
                         type: string
-                        enum:
-                            - success
+                        enum: 
+                            - success 
                             - fail
                             - not tested
                       reason:
@@ -3079,8 +2869,8 @@ paths:
                     properties:
                       status:
                         type: string
-                        enum:
-                            - success
+                        enum: 
+                            - success 
                             - fail
                       reason:
                         type: string
@@ -3139,7 +2929,10 @@ paths:
         name: answered
         required: false
         schema:
-          type: boolean
+          type: string
+          enum:
+            - true
+            - false
           description: retrieve only answered calls
       - in: query
         name: direction
@@ -3193,7 +2986,7 @@ paths:
                             format: uuid
                           from:
                             type: string
-                          to:
+                          to: 
                             type: string
                           answered:
                             type: boolean
@@ -3234,7 +3027,7 @@ paths:
                           - terminated_at
                           - answered
                           - direction
-                          - from
+                          - from 
                           - to
                           - sip_status
                           - duration
@@ -3291,8 +3084,7 @@ paths:
           content:
             application/octet-stream:
               schema:
-                type: string
-                format: binary
+                type: object
         404:
           description: account or call not found
   /ServiceProviders/{ServiceProviderSid}/RecentCalls:
@@ -3342,10 +3134,10 @@ paths:
         name: answered
         required: false
         schema:
-          type: boolean
-          # enum:
-          #   - true
-          #   - false
+          type: string
+          enum:
+            - true
+            - false
           description: retrieve only answered calls
       - in: query
         name: direction
@@ -3408,7 +3200,7 @@ paths:
                             format: uuid
                           from:
                             type: string
-                          to:
+                          to: 
                             type: string
                           answered:
                             type: boolean
@@ -3449,7 +3241,7 @@ paths:
                           - terminated_at
                           - answered
                           - direction
-                          - from
+                          - from 
                           - to
                           - sip_status
                           - duration
@@ -3506,8 +3298,7 @@ paths:
           content:
             application/octet-stream:
               schema:
-                type: string
-                format: binary
+                type: object
         404:
           description: account or call not found
   /ServiceProviders/{ServiceProviderSid}/Alerts:
@@ -3738,7 +3529,6 @@ paths:
       summary: create application
       operationId: createApplication
       requestBody:
-        required: true
         content:
           application/json:
             schema:
@@ -3756,19 +3546,22 @@ paths:
                 call_status_hook:
                   $ref: '#/components/schemas/Webhook'
                   description: webhook to report call status events
-                record_all_calls:
-                  type: integer
-                  enum: [0, 1]
-                messaging_hook:
-                  $ref: '#/components/schemas/Webhook'
-                  description: application webhook to handle inbound SMS/MMS messages
-              required:
+                app_json:
+                   type: string
+                   description: Voice Application Json, call_hook will not be invoked if app_json is provided
+                speech_synthesis_vendor:
+                  type: string
+                speech_synthesis_voice:
+                  type: string
+                speech_recognizer_vendor:
+                  type: string
+                speech_recognizer_language:
+                  type: string
+              required: 
                 - name
                 - account_sid
                 - call_hook
                 - call_status_hook
-                - messaging_hook
-                - record_all_calls
       responses:
         201:
           description: application successfully created
@@ -3850,7 +3643,6 @@ paths:
       tags:
        - Applications
       summary: retrieve an application
-      operationId: getApplication
       responses:
         200:
           description: application found
@@ -3872,40 +3664,10 @@ paths:
       summary: update application
       operationId: updateApplication
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                # We copy the schema in here because we
-                # the API errors out when application_sid is set
-                name:
-                  type: string
-                account_sid:
-                  type: string
-                  format: uuid
-                call_hook:
-                  $ref: '#/components/schemas/Webhook'
-                  description: application webhook for inbound voice calls
-                call_status_hook:
-                  $ref: '#/components/schemas/Webhook'
-                  description: webhook for reporting call status events
-                messaging_hook:
-                  $ref: '#/components/schemas/Webhook'
-                  description: application webhook for inbound SMS/MMS
-                record_all_calls:
-                  type: integer
-                  enum: [0, 1]
-              required:
-                # - application_sid
-                - name
-                - account_sid
-                - call_hook
-                - call_status_hook
-                - messaging_hook
-                - record_all_calls
-              # $ref: '#/components/schemas/Application'
+              $ref: '#/components/schemas/Application'
       responses:
         204:
           description: application updated
@@ -3923,8 +3685,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneralError'
-
-
+        
+  
   /Accounts/{AccountSid}/Conferences:
     get:
       tags:
@@ -3952,7 +3714,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneralError'
-
+  
   /Accounts/{AccountSid}/Calls:
     post:
       tags:
@@ -4025,7 +3787,6 @@ paths:
           content:
             application/json:
               schema:
-                type: object
                 required:
                   - sid
                 properties:
@@ -4210,7 +3971,7 @@ paths:
                       type: string
                     headers:
                       type: object
-                record:
+                record: 
                   type: object
                   properties:
                     action:
@@ -4221,7 +3982,7 @@ paths:
                       - pauseCallRecording
                       - resumeCallRecording
                     recordingID:
-                      type: string
+                      type: string 
                     siprecServerURL:
                       type: string
                 conferenceParticipantAction:
@@ -4261,58 +4022,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneralError'
-  /Accounts/{AccountSid}/Messages:
-    post:
-      tags:
-       - Accounts
-      summary: create an outgoing SMS message
-      operationId: createMessage
-      parameters:
-      - name: AccountSid
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Message'
-      responses:
-        201:
-          description: call successfully created
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - sid
-                properties:
-                  sid:
-                    type: string
-                    format: uuid
-                    example: 2531329f-fb09-4ef7-887e-84e648214436
-                  providerResponse:
-                    type: string
-        480:
-          description: temporary failure
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - sid
-                properties:
-                  sid:
-                    type: string
-                    format: uuid
-                    example: 2531329f-fb09-4ef7-887e-84e648214436
-                  message:
-                    type: string
-                  smpp_err_code:
-                    type: string
-        400:
-          description: bad request
   /Accounts/{AccountSid}/Queues:
     parameters:
       - name: AccountSid
@@ -4709,10 +4418,10 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/LcrRoute'
-              # required:
-              #   - lcr_sid
-              #   - regex
-              #   - priority
+              required:
+                - lcr_sid
+                - regex
+                - priority
       responses:
         201:
           description: Least Cost Routing Route successfully created
@@ -4855,10 +4564,10 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/LcrCarrierSetEntry'
-              # required:
-              #   - lcr_route_sid
-              #   - voip_carrier_sid
-              #   - priority
+              required:
+                - lcr_route_sid
+                - voip_carrier_sid
+                - priority
       responses:
         201:
           description: Least Cost Routing Carrier Set Entry successfully created
@@ -5001,11 +4710,11 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/GoogleCustomVoice'
-              # required:
-              #   - speech_credential_sid
-              #   - name
-              #   - reported_usage
-              #   - model
+              required:
+                - speech_credential_sid
+                - name
+                - reported_usage
+                - model
       responses:
         201:
           description: Least Cost Routing Carrier Set Entry successfully created
@@ -5047,7 +4756,7 @@ paths:
           schema:
             type: string
             description: return only the google voice custom operated belong to this account_sid
-
+            
         - in: query
           name: speech_credential_sid
           required: false
@@ -5168,7 +4877,7 @@ components:
         - username
         - password
       properties:
-        token:
+        token: 
           type: string
         user_sid:
           type: string
@@ -5176,18 +4885,18 @@ components:
           type: string
         force_change:
           type: boolean
-
+    
     Login:
       type: object
       properties:
-        username:
+        username: 
           type: string
         password:
-          type: string
+          type: string        
       required:
         - username
         - password
-
+    
     SuccessfulApiKeyAdd:
       type: object
       required:
@@ -5263,7 +4972,7 @@ components:
           format: uuid
         application_sid:
           type: string
-          format: uuid
+          format: uuid          
         e164_leading_plus:
           type: boolean
         requires_register:
@@ -5284,17 +4993,6 @@ components:
           type: string
         is_active:
           type: boolean
-        smpp_system_id:
-          type: string
-        smpp_password:
-          type: string
-        smpp_inbound_system_id:
-          type: string
-        smpp_inbound_password:
-          type: string
-        smpp_enquire_link_interval:
-          type: number
-          format: integer
       required:
         - voip_carrier_sid
         - name
@@ -5323,35 +5021,6 @@ components:
         - ipv4
         - port
         - netmask
-    SmppGateway:
-      type: object
-      properties:
-        smpp_gateway_sid:
-          type: string
-          format: uuid
-        ipv4:
-          type: string
-        port:
-          type: number
-        netmask:
-          type: number
-        voip_carrier_sid:
-          type: string
-          format: uuid
-        is_primary:
-          type: boolean
-        use_tls:
-          type: boolean
-        inbound:
-          type: boolean
-        outbound:
-          type: boolean
-      required:
-        - smpp_gateway_sid
-        - voip_carrier_sid
-        - ipv4
-        - port
-        - netmask
     Account:
       type: object
       properties:
@@ -5362,15 +5031,12 @@ components:
           type: string
         sip_realm:
           type: string
-          nullable: true
         registration_hook:
-          nullable: true
-          allOf:
-          - $ref: '#/components/schemas/Webhook'
+          $ref: '#/components/schemas/Webhook'
+          description: authentication webhook for registration
         device_calling_application_sid:
           type: string
           format: uuid
-          nullable: true
         service_provider_sid:
           type: string
           format: uuid
@@ -5394,21 +5060,19 @@ components:
           description: application webhook for inbound voice calls
         call_status_hook:
           $ref: '#/components/schemas/Webhook'
-          description: webhook for reporting call status events
-        messaging_hook:
-          $ref: '#/components/schemas/Webhook'
-          description: application webhook for inbound SMS/MMS
-        record_all_calls:
-          type: integer
-          enum: [0, 1]
+          description: webhhok for reporting call status events
+        speech_synthesis_vendor:
+          type: string
+        speech_synthesis_voice:
+          type: string
+        speech_recognizer_vendor:
+          type: string
+        speech_recognizer_language:
+          type: string
       required:
         - application_sid
         - name
         - account_sid
-        - call_hook
-        - call_status_hook
-        - messaging_hook
-        - record_all_calls
     ApiKey:
       type: object
       properties:
@@ -5453,7 +5117,6 @@ components:
         application_sid:
           type: string
           format: uuid
-          nullable: true
       required:
         - phone_number_sid
         - number
@@ -5489,20 +5152,14 @@ components:
         method:
           type: string
           enum:
-            - GET
-            - POST
-          default: POST
+            - get
+            - post
         username:
           type: string
-          nullable: true
         password:
           type: string
-          nullable: true
       required:
         - url
-        - method
-        - username
-        - password
       example: {"url": "https://acme.com", "method": "POST"}
     MsTeamsTenant:
       type: object
@@ -5553,7 +5210,7 @@ components:
           type: string
           enum:
             - inbound
-            - outbound
+            - outbound 
         duration:
           type: integer
         from:
@@ -5580,7 +5237,6 @@ components:
         - sip_status
         - to
     Target:
-      type: object
       properties:
         type:
           type: string
@@ -5616,7 +5272,6 @@ components:
         - type
       example: {"type": "phone", "number": "+16172375080"}
     Message:
-      type: object
       properties:
         provider:
           type: string
@@ -5633,7 +5288,6 @@ components:
         - to
       example: {"from": "13394445678", "to": "16173333456", "text": "please call when you can"}
     SpeechCredential:
-      type: object
       properties:
         speech_credential_sid:
           type: string
@@ -5671,7 +5325,6 @@ components:
         riva_server_uri:
           type: string
     SpeechCredentialUpdate:
-      type: object
       properties:
         use_for_tts:
           type: boolean
@@ -5685,7 +5338,7 @@ components:
           properties:
             user_sid:
               type: string
-            name:
+            name: 
               type: string
             email:
               type: string
@@ -5740,8 +5393,6 @@ components:
               type: string
             call_status_hook_sid:
               type: string
-            messaging_hook_sid:
-              type: string
             speech_synthesis_vendor:
               type: string
             speech_synthesis_language:
@@ -5758,7 +5409,7 @@ components:
             currency:
               type: string
               enum:
-                - USD
+                - USD 
                 - EUR
             balance:
               type: number
@@ -5822,7 +5473,7 @@ components:
     UserProfile:
       type: object
       properties:
-        user_sid:
+        user_sid: 
           type: string
           example: a5bce31e-a028-45cd-94c4-f121b72fec61
         account_sid:
@@ -5946,7 +5597,7 @@ components:
           format: uuid
         from:
           type: string
-        to:
+        to: 
           type: string
         answered:
           type: boolean
@@ -5987,7 +5638,7 @@ components:
         - terminated_at
         - answered
         - direction
-        - from
+        - from 
         - to
         - sip_status
         - duration
@@ -6239,7 +5890,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LanguageVoice'
-
+        
     SpeechLanguagesVoices:
       type: object
       properties:
@@ -6257,10 +5908,10 @@ components:
             $ref: '#/components/schemas/TtsModel'
     UserList:
       type: object
-      properties:
+      properties:      
         name:
           type: string
-        email:
+        email: 
           type: string
         is_active:
           type: boolean

@@ -30,6 +30,7 @@ import (
 var (
 	_ resource.Resource                = (*applicationResource)(nil)
 	_ resource.ResourceWithImportState = (*applicationResource)(nil)
+	_ resource.ResourceWithModifyPlan  = (*applicationResource)(nil)
 )
 
 func NewApplicationResource() resource.Resource { return &applicationResource{} }
@@ -80,32 +81,28 @@ func (r *applicationResource) Create(ctx context.Context, req resource.CreateReq
 	// this body at all, so server-owned values are never sent.
 	body := jambonzapi.CreateApplicationJSONRequestBody{}
 	setUUID(&body.AccountSid, data.AccountSid)
+	setStringPtr(&body.AppJson, data.AppJson)
 
 	if !data.CallHook.IsNull() && !data.CallHook.IsUnknown() {
 		callHook := &body.CallHook
-		setString(&callHook.Method, data.CallHook.Method)
-		setString(&callHook.Password, data.CallHook.Password)
+		setStringPtr(&callHook.Method, data.CallHook.Method)
+		setStringPtr(&callHook.Password, data.CallHook.Password)
 		setString(&callHook.Url, data.CallHook.Url)
-		setString(&callHook.Username, data.CallHook.Username)
+		setStringPtr(&callHook.Username, data.CallHook.Username)
 	}
 
 	if !data.CallStatusHook.IsNull() && !data.CallStatusHook.IsUnknown() {
 		callStatusHook := &body.CallStatusHook
-		setString(&callStatusHook.Method, data.CallStatusHook.Method)
-		setString(&callStatusHook.Password, data.CallStatusHook.Password)
+		setStringPtr(&callStatusHook.Method, data.CallStatusHook.Method)
+		setStringPtr(&callStatusHook.Password, data.CallStatusHook.Password)
 		setString(&callStatusHook.Url, data.CallStatusHook.Url)
-		setString(&callStatusHook.Username, data.CallStatusHook.Username)
-	}
-
-	if !data.MessagingHook.IsNull() && !data.MessagingHook.IsUnknown() {
-		messagingHook := &body.MessagingHook
-		setString(&messagingHook.Method, data.MessagingHook.Method)
-		setString(&messagingHook.Password, data.MessagingHook.Password)
-		setString(&messagingHook.Url, data.MessagingHook.Url)
-		setString(&messagingHook.Username, data.MessagingHook.Username)
+		setStringPtr(&callStatusHook.Username, data.CallStatusHook.Username)
 	}
 	setString(&body.Name, data.Name)
-	setInt(&body.RecordAllCalls, data.RecordAllCalls)
+	setStringPtr(&body.SpeechRecognizerLanguage, data.SpeechRecognizerLanguage)
+	setStringPtr(&body.SpeechRecognizerVendor, data.SpeechRecognizerVendor)
+	setStringPtr(&body.SpeechSynthesisVendor, data.SpeechSynthesisVendor)
+	setStringPtr(&body.SpeechSynthesisVoice, data.SpeechSynthesisVoice)
 
 	api, err := r.client.CreateApplicationWithResponse(ctx, body)
 	if err != nil {
@@ -183,30 +180,25 @@ func (r *applicationResource) Update(ctx context.Context, req resource.UpdateReq
 	setUUID(&body.AccountSid, plan.AccountSid)
 
 	if !plan.CallHook.IsNull() && !plan.CallHook.IsUnknown() {
-		callHook := &body.CallHook
-		setString(&callHook.Method, plan.CallHook.Method)
-		setString(&callHook.Password, plan.CallHook.Password)
+		callHook := ensure(&body.CallHook)
+		setStringPtr(&callHook.Method, plan.CallHook.Method)
+		setStringPtr(&callHook.Password, plan.CallHook.Password)
 		setString(&callHook.Url, plan.CallHook.Url)
-		setString(&callHook.Username, plan.CallHook.Username)
+		setStringPtr(&callHook.Username, plan.CallHook.Username)
 	}
 
 	if !plan.CallStatusHook.IsNull() && !plan.CallStatusHook.IsUnknown() {
-		callStatusHook := &body.CallStatusHook
-		setString(&callStatusHook.Method, plan.CallStatusHook.Method)
-		setString(&callStatusHook.Password, plan.CallStatusHook.Password)
+		callStatusHook := ensure(&body.CallStatusHook)
+		setStringPtr(&callStatusHook.Method, plan.CallStatusHook.Method)
+		setStringPtr(&callStatusHook.Password, plan.CallStatusHook.Password)
 		setString(&callStatusHook.Url, plan.CallStatusHook.Url)
-		setString(&callStatusHook.Username, plan.CallStatusHook.Username)
-	}
-
-	if !plan.MessagingHook.IsNull() && !plan.MessagingHook.IsUnknown() {
-		messagingHook := &body.MessagingHook
-		setString(&messagingHook.Method, plan.MessagingHook.Method)
-		setString(&messagingHook.Password, plan.MessagingHook.Password)
-		setString(&messagingHook.Url, plan.MessagingHook.Url)
-		setString(&messagingHook.Username, plan.MessagingHook.Username)
+		setStringPtr(&callStatusHook.Username, plan.CallStatusHook.Username)
 	}
 	setString(&body.Name, plan.Name)
-	setInt(&body.RecordAllCalls, plan.RecordAllCalls)
+	setStringPtr(&body.SpeechRecognizerLanguage, plan.SpeechRecognizerLanguage)
+	setStringPtr(&body.SpeechRecognizerVendor, plan.SpeechRecognizerVendor)
+	setStringPtr(&body.SpeechSynthesisVendor, plan.SpeechSynthesisVendor)
+	setStringPtr(&body.SpeechSynthesisVoice, plan.SpeechSynthesisVoice)
 
 	id := plan.ApplicationSid.ValueString()
 	api, err := r.client.UpdateApplicationWithResponse(ctx, id, body)
@@ -263,6 +255,30 @@ func (r *applicationResource) ImportState(ctx context.Context, req resource.Impo
 	resource.ImportStatePassthroughID(ctx, path.Root("application_sid"), req, resp)
 }
 
+// ModifyPlan forces replacement for the attributes the create body accepts and
+// the update body does not.
+//
+// Without it those attributes are settable, and changing one plans as an in-place
+// update that sends a body with no such property — the API stores nothing, the
+// apply reports success, and the next read shows the old value back. Which
+// attributes these are is not a judgement: it is the difference between the two
+// bodies, read from the spec.
+func (r *applicationResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// Nothing to force on a create (no state) or a destroy (no plan).
+	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
+		return
+	}
+	var plan, state resource_application.ApplicationModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if !plan.AppJson.Equal(state.AppJson) {
+		resp.RequiresReplace = append(resp.RequiresReplace, path.Root("app_json"))
+	}
+}
+
 // fetch reads the record addressed by data.ApplicationSid and copies it onto data.
 // It reports whether the record exists, and whether the caller should carry on —
 // a 404 is the first and not the second, and every other failure is neither.
@@ -292,14 +308,16 @@ func (r *applicationResource) apply(ctx context.Context, data *resource_applicat
 	}
 	data.AccountSid = uuidValue(p.AccountSid)
 
-	{
+	if p.CallHook == nil {
+		data.CallHook = resource_application.NewCallHookValueNull()
+	} else {
 		callHook, d := resource_application.NewCallHookValue(
 			data.CallHook.AttributeTypes(ctx),
 			map[string]attr.Value{
-				"method":      types.StringValue(string(p.CallHook.Method)),
-				"password":    types.StringValue(string(p.CallHook.Password)),
+				"method":      types.StringPointerValue((*string)(p.CallHook.Method)),
+				"password":    types.StringPointerValue((*string)(p.CallHook.Password)),
 				"url":         types.StringValue(string(p.CallHook.Url)),
-				"username":    types.StringValue(string(p.CallHook.Username)),
+				"username":    types.StringPointerValue((*string)(p.CallHook.Username)),
 				"webhook_sid": uuidPointerValue(p.CallHook.WebhookSid),
 			},
 		)
@@ -307,36 +325,26 @@ func (r *applicationResource) apply(ctx context.Context, data *resource_applicat
 		data.CallHook = callHook
 	}
 
-	{
+	if p.CallStatusHook == nil {
+		data.CallStatusHook = resource_application.NewCallStatusHookValueNull()
+	} else {
 		callStatusHook, d := resource_application.NewCallStatusHookValue(
 			data.CallStatusHook.AttributeTypes(ctx),
 			map[string]attr.Value{
-				"method":      types.StringValue(string(p.CallStatusHook.Method)),
-				"password":    types.StringValue(string(p.CallStatusHook.Password)),
+				"method":      types.StringPointerValue((*string)(p.CallStatusHook.Method)),
+				"password":    types.StringPointerValue((*string)(p.CallStatusHook.Password)),
 				"url":         types.StringValue(string(p.CallStatusHook.Url)),
-				"username":    types.StringValue(string(p.CallStatusHook.Username)),
+				"username":    types.StringPointerValue((*string)(p.CallStatusHook.Username)),
 				"webhook_sid": uuidPointerValue(p.CallStatusHook.WebhookSid),
 			},
 		)
 		diags.Append(d...)
 		data.CallStatusHook = callStatusHook
 	}
-
-	{
-		messagingHook, d := resource_application.NewMessagingHookValue(
-			data.MessagingHook.AttributeTypes(ctx),
-			map[string]attr.Value{
-				"method":      types.StringValue(string(p.MessagingHook.Method)),
-				"password":    types.StringValue(string(p.MessagingHook.Password)),
-				"url":         types.StringValue(string(p.MessagingHook.Url)),
-				"username":    types.StringValue(string(p.MessagingHook.Username)),
-				"webhook_sid": uuidPointerValue(p.MessagingHook.WebhookSid),
-			},
-		)
-		diags.Append(d...)
-		data.MessagingHook = messagingHook
-	}
 	data.Name = types.StringValue(string(p.Name))
-	data.RecordAllCalls = types.Int64Value(int64(p.RecordAllCalls))
+	data.SpeechRecognizerLanguage = types.StringPointerValue((*string)(p.SpeechRecognizerLanguage))
+	data.SpeechRecognizerVendor = types.StringPointerValue((*string)(p.SpeechRecognizerVendor))
+	data.SpeechSynthesisVendor = types.StringPointerValue((*string)(p.SpeechSynthesisVendor))
+	data.SpeechSynthesisVoice = types.StringPointerValue((*string)(p.SpeechSynthesisVoice))
 	data.ApplicationSid = uuidPointerValue(p.ApplicationSid)
 }

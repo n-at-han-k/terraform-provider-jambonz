@@ -114,11 +114,6 @@ func (d *voipCarrierDataSource) apply(ctx context.Context, data *datasource_voip
 	data.RegisterUseTls = types.BoolPointerValue((*bool)(p.RegisterUseTls))
 	data.RegisterUsername = types.StringPointerValue((*string)(p.RegisterUsername))
 	data.RequiresRegister = types.BoolPointerValue((*bool)(p.RequiresRegister))
-	data.SmppEnquireLinkInterval = floatPointerValue(p.SmppEnquireLinkInterval)
-	data.SmppInboundPassword = types.StringPointerValue((*string)(p.SmppInboundPassword))
-	data.SmppInboundSystemId = types.StringPointerValue((*string)(p.SmppInboundSystemId))
-	data.SmppPassword = types.StringPointerValue((*string)(p.SmppPassword))
-	data.SmppSystemId = types.StringPointerValue((*string)(p.SmppSystemId))
 	data.TechPrefix = types.StringPointerValue((*string)(p.TechPrefix))
 	_ = ctx
 	_ = diags

@@ -107,10 +107,10 @@ func (d *accountDataSource) apply(ctx context.Context, data *datasource_account.
 		registrationHook, d := datasource_account.NewRegistrationHookValue(
 			data.RegistrationHook.AttributeTypes(ctx),
 			map[string]attr.Value{
-				"method":      types.StringValue(string(p.RegistrationHook.Method)),
-				"password":    types.StringValue(string(p.RegistrationHook.Password)),
+				"method":      types.StringPointerValue((*string)(p.RegistrationHook.Method)),
+				"password":    types.StringPointerValue((*string)(p.RegistrationHook.Password)),
 				"url":         types.StringValue(string(p.RegistrationHook.Url)),
-				"username":    types.StringValue(string(p.RegistrationHook.Username)),
+				"username":    types.StringPointerValue((*string)(p.RegistrationHook.Username)),
 				"webhook_sid": uuidPointerValue(p.RegistrationHook.WebhookSid),
 			},
 		)

@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -40,21 +39,22 @@ func AccountResourceSchema(ctx context.Context) schema.Schema {
 						Computed: true,
 						Validators: []validator.String{
 							stringvalidator.OneOf(
-								"GET",
-								"POST",
+								"get",
+								"post",
 							),
 						},
-						Default: stringdefault.StaticString("POST"),
 					},
 					"password": schema.StringAttribute{
-						Required:  true,
+						Optional:  true,
+						Computed:  true,
 						Sensitive: true,
 					},
 					"url": schema.StringAttribute{
 						Required: true,
 					},
 					"username": schema.StringAttribute{
-						Required: true,
+						Optional: true,
+						Computed: true,
 					},
 					"webhook_sid": schema.StringAttribute{
 						Optional: true,

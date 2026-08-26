@@ -73,23 +73,6 @@ func VoipCarrierDataSourceSchema(ctx context.Context) schema.Schema {
 			"requires_register": schema.BoolAttribute{
 				Computed: true,
 			},
-			"smpp_enquire_link_interval": schema.NumberAttribute{
-				Computed: true,
-			},
-			"smpp_inbound_password": schema.StringAttribute{
-				Computed:  true,
-				Sensitive: true,
-			},
-			"smpp_inbound_system_id": schema.StringAttribute{
-				Computed: true,
-			},
-			"smpp_password": schema.StringAttribute{
-				Computed:  true,
-				Sensitive: true,
-			},
-			"smpp_system_id": schema.StringAttribute{
-				Computed: true,
-			},
 			"tech_prefix": schema.StringAttribute{
 				Computed: true,
 			},
@@ -118,11 +101,6 @@ type VoipCarrierModel struct {
 	RegisterUseTls            types.Bool   `tfsdk:"register_use_tls"`
 	RegisterUsername          types.String `tfsdk:"register_username"`
 	RequiresRegister          types.Bool   `tfsdk:"requires_register"`
-	SmppEnquireLinkInterval   types.Number `tfsdk:"smpp_enquire_link_interval"`
-	SmppInboundPassword       types.String `tfsdk:"smpp_inbound_password"`
-	SmppInboundSystemId       types.String `tfsdk:"smpp_inbound_system_id"`
-	SmppPassword              types.String `tfsdk:"smpp_password"`
-	SmppSystemId              types.String `tfsdk:"smpp_system_id"`
 	TechPrefix                types.String `tfsdk:"tech_prefix"`
 	VoipCarrierSid            types.String `tfsdk:"voip_carrier_sid"`
 }
