@@ -1,3 +1,17 @@
+# Pipeline intermediates. build/ is stage 3's output — the Terraform-shaped
+# OpenAPI document, regenerated from codegen/openapi.yaml on every `make gen`.
+# .tools/ is the two HashiCorp generators, pinned in the GNUmakefile.
+# node_modules is openapi-format, which stage 3 applies the overlay with.
+/build/
+/.tools/
+/node_modules/
+terraform-provider-jambonz
+
+# Rejected generator output. cmd/gen writes one of these instead of a source file
+# the compiler would refuse, so a broken template is a failed build and not an
+# import error later.
+*.broken
+
 *.dll
 *.exe
 .DS_Store

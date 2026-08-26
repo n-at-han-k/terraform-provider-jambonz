@@ -1,0 +1,189 @@
+overlay: 1.0.0
+info:
+  title: Terraform shaping for the jambonz REST API
+  version: 1.0.0
+
+# What the API *means*, stated once, in the vocabulary Terraform needs: which
+# operation is a resource's create, which properties the server owns, which are
+# secrets, and where the published description and the implementation disagree.
+#
+# Every action here must resolve. scripts/overlay.mjs fails the build on any that
+# does not, because an overlay whose targets have moved applies nothing, exits 0,
+# and reads in review like a contract.
+actions:
+  # ---- the naming contract ------------------------------------------------
+  #
+  # cmd/gen looks each operation up by operationId, as create<R>/get<R>/
+  # update<R>/delete<R>/list<R>s. Most of the jambonz spec is already written
+  # that way; these two are not.
+  - target: $.paths['/PhoneNumbers'].post
+    description: Canonical create operation for the phone_number resource
+    update:
+      operationId: createPhoneNumber
+
+  - target: $.paths['/PhoneNumbers'].get
+    description: Canonical list operation, read by the phone_numbers data source
+    update:
+      operationId: listPhoneNumbers
+
+  # ---- what the server owns ------------------------------------------------
+  #
+  # A readOnly property becomes a computed Terraform attribute, and cmd/gen never
+  # sends it in a request body. That second half matters here: every jambonz
+  # update is a whole-record PUT whose body schema $refs the record — including
+  # its own sid — and the API rejects a body that carries it. The Applications
+  # update body already works around this by hand-copying the schema minus the
+  # sid, with a comment saying why. readOnly states it once, for all five.
+  - target: $.components.schemas.Account.properties.account_sid
+    description: Server-assigned identifier; the import ID
+    update:
+      readOnly: true
+
+  - target: $.components.schemas.Application.properties.application_sid
+    description: Server-assigned identifier; the import ID
+    update:
+      readOnly: true
+
+  - target: $.components.schemas.PhoneNumber.properties.phone_number_sid
+    description: Server-assigned identifier; the import ID
+    update:
+      readOnly: true
+
+  - target: $.components.schemas.VoipCarrier.properties.voip_carrier_sid
+    description: Server-assigned identifier; the import ID
+    update:
+      readOnly: true
+
+  - target: $.components.schemas.SipGateway.properties.sip_gateway_sid
+    description: Server-assigned identifier; the import ID
+    update:
+      readOnly: true
+
+  - target: $.components.schemas.Webhook.properties.webhook_sid
+    description: Server-assigned; a webhook is addressed through its owning record
+    update:
+      readOnly: true
+
+  # ---- secrets -------------------------------------------------------------
+  #
+  # tfplugingen-openapi marks an attribute sensitive from `format: password`, and
+  # sensitive is why cmd/gen writes these back only when the server actually sent
+  # one: a secret the API omits on read must not be overwritten with null.
+  - target: $.components.schemas.Webhook.properties.password
+    description: Basic-auth secret for the webhook
+    update:
+      format: password
+
+  - target: $.components.schemas.VoipCarrier.properties.register_password
+    description: SIP registration secret
+    update:
+      format: password
+
+  - target: $.components.schemas.VoipCarrier.properties.inbound_auth_password
+    description: Inbound challenge secret
+    update:
+      format: password
+
+  - target: $.components.schemas.VoipCarrier.properties.smpp_password
+    description: SMPP outbound bind secret
+    update:
+      format: password
+
+  - target: $.components.schemas.VoipCarrier.properties.smpp_inbound_password
+    description: SMPP inbound bind secret
+    update:
+      format: password
+
+  - target: $.paths['/VoipCarriers'].post.requestBody.content['application/json'].schema.properties.register_password
+    description: SIP registration secret
+    update:
+      format: password
+
+  - target: $.paths['/VoipCarriers'].post.requestBody.content['application/json'].schema.properties.inbound_auth_password
+    description: Inbound challenge secret
+    update:
+      format: password
+
+  # ---- where the spec and the implementation disagree ----------------------
+  #
+  # PUT /VoipCarriers/{sid} documents a 204 that carries a VoipCarrier body. 204
+  # means no content, and the API sends none — the sibling PUTs all declare the
+  # bare 204 this one should. Left as written, cmd/gen would bind the update to a
+  # response field oapi-codegen never populates.
+  - target: $.paths['/VoipCarriers/{VoipCarrierSid}'].put.responses['204']
+    description: 204 No Content carries no body, and this endpoint sends none
+    remove: true
+
+  - target: $.paths['/VoipCarriers/{VoipCarrierSid}'].put.responses
+    description: Restore the bare 204 the sibling update operations declare
+    update:
+      "204":
+        description: voip carrier updated
+
+  # A create body and its record schema have to describe the same resource, or an
+  # attribute is settable and never read back (a permanent diff) or readable and
+  # never settable (silently dropped on create). These four are columns the API
+  # stores and returns; the record schema simply omits them.
+  - target: $.components.schemas.VoipCarrier.properties
+    description: Registration options carried by the create body but missing from the record
+    update:
+      register_use_tls:
+        type: boolean
+        description: whether to REGISTER over TLS
+      register_from_user:
+        type: string
+        description: optional username to apply in the From header
+      register_from_domain:
+        type: string
+        description: optional domain to apply in the From header
+      register_public_ip_in_contact:
+        type: boolean
+        description: if true, use our public ip in the Contact header; otherwise the sip realm
+
+  # The reverse: fields the record carries and the create body omits. Terraform
+  # sets them at create or not at all, so the body has to accept them.
+  - target: $.paths['/VoipCarriers'].post.requestBody.content['application/json'].schema.properties
+    description: Fields the VoipCarrier record carries that the create body omitted
+    update:
+      is_active:
+        type: boolean
+      smpp_system_id:
+        type: string
+      smpp_password:
+        type: string
+        format: password
+      smpp_inbound_system_id:
+        type: string
+      smpp_inbound_password:
+        type: string
+        format: password
+      smpp_enquire_link_interval:
+        type: number
+        format: integer
+
+  - target: $.paths['/Accounts'].post.requestBody.content['application/json'].schema.properties
+    description: The Account record carries device_calling_application_sid; the create body omitted it
+    update:
+      device_calling_application_sid:
+        type: string
+        format: uuid
+        nullable: true
+
+  # queue_event_hook is the other direction and cannot be fixed the same way: the
+  # create body accepts it, the Account record does not return it, and a value
+  # Terraform can write but never read is a diff on every plan. Dropping it from
+  # the body is the honest half — the alternative is asserting a response field
+  # this spec does not document.
+  - target: $.paths['/Accounts'].post.requestBody.content['application/json'].schema.properties.queue_event_hook
+    description: Accepted on create but absent from the Account record; unmanageable as written
+    remove: true
+
+  # SipGateway's create body omits netmask, which the record both requires and
+  # returns — a gateway created through Terraform would take the server default
+  # and then read back as drift.
+  - target: $.paths['/SipGateways'].post.requestBody.content['application/json'].schema.properties
+    description: netmask is required by the record and missing from the create body
+    update:
+      netmask:
+        type: number
+        description: CIDR prefix length for the gateway network

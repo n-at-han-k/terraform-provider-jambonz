@@ -1,0 +1,1042 @@
+{
+	"datasources": [
+		{
+			"name": "account",
+			"schema": {
+				"attributes": [
+					{
+						"name": "account_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "device_calling_application_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "name",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "registration_hook",
+						"single_nested": {
+							"attributes": [
+								{
+									"name": "method",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "password",
+									"string": {
+										"computed_optional_required": "computed",
+										"sensitive": true
+									}
+								},
+								{
+									"name": "url",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "username",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "webhook_sid",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								}
+							],
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "service_provider_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "sip_realm",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "application",
+			"schema": {
+				"attributes": [
+					{
+						"name": "application_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "account_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "call_hook",
+						"single_nested": {
+							"attributes": [
+								{
+									"name": "method",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "password",
+									"string": {
+										"computed_optional_required": "computed",
+										"sensitive": true
+									}
+								},
+								{
+									"name": "url",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "username",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "webhook_sid",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								}
+							],
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "call_status_hook",
+						"single_nested": {
+							"attributes": [
+								{
+									"name": "method",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "password",
+									"string": {
+										"computed_optional_required": "computed",
+										"sensitive": true
+									}
+								},
+								{
+									"name": "url",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "username",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "webhook_sid",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								}
+							],
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "messaging_hook",
+						"single_nested": {
+							"attributes": [
+								{
+									"name": "method",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "password",
+									"string": {
+										"computed_optional_required": "computed",
+										"sensitive": true
+									}
+								},
+								{
+									"name": "url",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "username",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "webhook_sid",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								}
+							],
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "name",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"int64": {
+							"computed_optional_required": "computed"
+						},
+						"name": "record_all_calls"
+					}
+				]
+			}
+		},
+		{
+			"name": "phone_number",
+			"schema": {
+				"attributes": [
+					{
+						"name": "phone_number_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "account_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "application_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "number",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "voip_carrier_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "sip_gateway",
+			"schema": {
+				"attributes": [
+					{
+						"name": "sip_gateway_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed"
+						},
+						"name": "inbound"
+					},
+					{
+						"name": "ipv4",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "netmask",
+						"number": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed"
+						},
+						"name": "outbound"
+					},
+					{
+						"name": "port",
+						"number": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "voip_carrier_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "voip_carrier",
+			"schema": {
+				"attributes": [
+					{
+						"name": "voip_carrier_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "account_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "application_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "description",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "diversion",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed"
+						},
+						"name": "e164_leading_plus"
+					},
+					{
+						"name": "inbound_auth_password",
+						"string": {
+							"computed_optional_required": "computed",
+							"sensitive": true
+						}
+					},
+					{
+						"name": "inbound_auth_username",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed"
+						},
+						"name": "is_active"
+					},
+					{
+						"name": "name",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "register_from_domain",
+						"string": {
+							"computed_optional_required": "computed",
+							"description": "optional domain to apply in the From header"
+						}
+					},
+					{
+						"name": "register_from_user",
+						"string": {
+							"computed_optional_required": "computed",
+							"description": "optional username to apply in the From header"
+						}
+					},
+					{
+						"name": "register_password",
+						"string": {
+							"computed_optional_required": "computed",
+							"sensitive": true
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed",
+							"description": "if true, use our public ip in the Contact header; otherwise the sip realm"
+						},
+						"name": "register_public_ip_in_contact"
+					},
+					{
+						"name": "register_sip_realm",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed",
+							"description": "whether to REGISTER over TLS"
+						},
+						"name": "register_use_tls"
+					},
+					{
+						"name": "register_username",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed"
+						},
+						"name": "requires_register"
+					},
+					{
+						"name": "smpp_enquire_link_interval",
+						"number": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "smpp_inbound_password",
+						"string": {
+							"computed_optional_required": "computed",
+							"sensitive": true
+						}
+					},
+					{
+						"name": "smpp_inbound_system_id",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "smpp_password",
+						"string": {
+							"computed_optional_required": "computed",
+							"sensitive": true
+						}
+					},
+					{
+						"name": "smpp_system_id",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "tech_prefix",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		}
+	],
+	"provider": {
+		"name": "jambonz"
+	},
+	"resources": [
+		{
+			"name": "account",
+			"schema": {
+				"attributes": [
+					{
+						"name": "device_calling_application_sid",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "name",
+						"string": {
+							"computed_optional_required": "required",
+							"description": "account name"
+						}
+					},
+					{
+						"name": "registration_hook",
+						"single_nested": {
+							"attributes": [
+								{
+									"name": "method",
+									"string": {
+										"computed_optional_required": "computed_optional",
+										"default": {
+											"static": "POST"
+										},
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.OneOf(\n\"GET\",\n\"POST\",\n)"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "password",
+									"string": {
+										"computed_optional_required": "required",
+										"sensitive": true
+									}
+								},
+								{
+									"name": "url",
+									"string": {
+										"computed_optional_required": "required"
+									}
+								},
+								{
+									"name": "username",
+									"string": {
+										"computed_optional_required": "required"
+									}
+								},
+								{
+									"name": "webhook_sid",
+									"string": {
+										"computed_optional_required": "computed_optional"
+									}
+								}
+							],
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "service_provider_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "sip_realm",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "sip realm for registration"
+						}
+					},
+					{
+						"name": "account_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "application",
+			"schema": {
+				"attributes": [
+					{
+						"name": "account_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "call_hook",
+						"single_nested": {
+							"attributes": [
+								{
+									"name": "method",
+									"string": {
+										"computed_optional_required": "computed_optional",
+										"default": {
+											"static": "POST"
+										},
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.OneOf(\n\"GET\",\n\"POST\",\n)"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "password",
+									"string": {
+										"computed_optional_required": "required",
+										"sensitive": true
+									}
+								},
+								{
+									"name": "url",
+									"string": {
+										"computed_optional_required": "required"
+									}
+								},
+								{
+									"name": "username",
+									"string": {
+										"computed_optional_required": "required"
+									}
+								},
+								{
+									"name": "webhook_sid",
+									"string": {
+										"computed_optional_required": "computed_optional"
+									}
+								}
+							],
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "call_status_hook",
+						"single_nested": {
+							"attributes": [
+								{
+									"name": "method",
+									"string": {
+										"computed_optional_required": "computed_optional",
+										"default": {
+											"static": "POST"
+										},
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.OneOf(\n\"GET\",\n\"POST\",\n)"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "password",
+									"string": {
+										"computed_optional_required": "required",
+										"sensitive": true
+									}
+								},
+								{
+									"name": "url",
+									"string": {
+										"computed_optional_required": "required"
+									}
+								},
+								{
+									"name": "username",
+									"string": {
+										"computed_optional_required": "required"
+									}
+								},
+								{
+									"name": "webhook_sid",
+									"string": {
+										"computed_optional_required": "computed_optional"
+									}
+								}
+							],
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "messaging_hook",
+						"single_nested": {
+							"attributes": [
+								{
+									"name": "method",
+									"string": {
+										"computed_optional_required": "computed_optional",
+										"default": {
+											"static": "POST"
+										},
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.OneOf(\n\"GET\",\n\"POST\",\n)"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "password",
+									"string": {
+										"computed_optional_required": "required",
+										"sensitive": true
+									}
+								},
+								{
+									"name": "url",
+									"string": {
+										"computed_optional_required": "required"
+									}
+								},
+								{
+									"name": "username",
+									"string": {
+										"computed_optional_required": "required"
+									}
+								},
+								{
+									"name": "webhook_sid",
+									"string": {
+										"computed_optional_required": "computed_optional"
+									}
+								}
+							],
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "name",
+						"string": {
+							"computed_optional_required": "required",
+							"description": "application name"
+						}
+					},
+					{
+						"int64": {
+							"computed_optional_required": "required",
+							"validators": [
+								{
+									"custom": {
+										"imports": [
+											{
+												"path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+											}
+										],
+										"schema_definition": "int64validator.OneOf(\n0,\n1,\n)"
+									}
+								}
+							]
+						},
+						"name": "record_all_calls"
+					},
+					{
+						"name": "application_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "phone_number",
+			"schema": {
+				"attributes": [
+					{
+						"name": "account_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "application_sid",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "number",
+						"string": {
+							"computed_optional_required": "required",
+							"description": "telephone number"
+						}
+					},
+					{
+						"name": "voip_carrier_sid",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"name": "phone_number_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "sip_gateway",
+			"schema": {
+				"attributes": [
+					{
+						"bool": {
+							"computed_optional_required": "computed_optional"
+						},
+						"name": "inbound"
+					},
+					{
+						"name": "ipv4",
+						"string": {
+							"computed_optional_required": "required"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed_optional"
+						},
+						"name": "is_active"
+					},
+					{
+						"name": "netmask",
+						"number": {
+							"computed_optional_required": "computed_optional",
+							"description": "CIDR prefix length for the gateway network"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed_optional"
+						},
+						"name": "outbound"
+					},
+					{
+						"name": "port",
+						"number": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "voip_carrier_sid",
+						"string": {
+							"computed_optional_required": "required",
+							"description": "voip carrier that provides this gateway"
+						}
+					},
+					{
+						"name": "sip_gateway_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "voip_carrier",
+			"schema": {
+				"attributes": [
+					{
+						"name": "account_sid",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "application_sid",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "description",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "diversion",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "Diversion header or phone number to apply to outbound calls"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed_optional",
+							"description": "whether a leading + is required on INVITEs to this provider"
+						},
+						"name": "e164_leading_plus"
+					},
+					{
+						"name": "inbound_auth_password",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "challenge inbound calls with this username/password if supplied",
+							"sensitive": true
+						}
+					},
+					{
+						"name": "inbound_auth_username",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "challenge inbound calls with this username/password if supplied"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed_optional"
+						},
+						"name": "is_active"
+					},
+					{
+						"name": "name",
+						"string": {
+							"computed_optional_required": "required",
+							"description": "voip carrier name"
+						}
+					},
+					{
+						"name": "register_from_domain",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "optional domain to apply in From header"
+						}
+					},
+					{
+						"name": "register_from_user",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "optional username to apply in From header"
+						}
+					},
+					{
+						"name": "register_password",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "sip password to authenticate with, if registration is required",
+							"sensitive": true
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed_optional",
+							"description": "if true, use our public ip in Contact header; otherwise, use sip realm"
+						},
+						"name": "register_public_ip_in_contact"
+					},
+					{
+						"name": "register_sip_realm",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "sip realm to authenticate with, if registration is required"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed_optional",
+							"description": "wehther this provider requires us to send a REGISTER use TLS protocol"
+						},
+						"name": "register_use_tls"
+					},
+					{
+						"name": "register_username",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "sip username to authenticate with, if registration is required"
+						}
+					},
+					{
+						"bool": {
+							"computed_optional_required": "computed_optional",
+							"description": "wehther this provider requires us to send a REGISTER to them in order to receive calls"
+						},
+						"name": "requires_register"
+					},
+					{
+						"name": "smpp_enquire_link_interval",
+						"number": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "smpp_inbound_password",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"sensitive": true
+						}
+					},
+					{
+						"name": "smpp_inbound_system_id",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "smpp_password",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"sensitive": true
+						}
+					},
+					{
+						"name": "smpp_system_id",
+						"string": {
+							"computed_optional_required": "computed_optional"
+						}
+					},
+					{
+						"name": "tech_prefix",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "prefix to be applied to the called number for outbound call attempts"
+						}
+					},
+					{
+						"name": "voip_carrier_sid",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		}
+	],
+	"version": "0.1"
+}

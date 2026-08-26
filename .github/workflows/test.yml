@@ -1,8 +1,11 @@
 # Terraform Provider testing workflow.
+#
+# Almost every Go file in internal/ is generated from codegen/openapi.yaml, so the
+# job that matters most here is `regenerate`: it runs the whole pipeline and fails
+# if the committed output and the spec disagree. Everything else — the build, the
+# linters, the acceptance tests — is checking code that regeneration would replace.
 name: Tests
 
-# This GitHub action runs your tests for each pull request and push.
-# Optionally, you can turn it on using a schedule for regular testing.
 on:
   pull_request:
     paths-ignore:
@@ -20,7 +23,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
@@ -34,23 +37,63 @@ jobs:
         with:
           version: latest
 
-  generate:
+  # The generator has its own module and its own tests. They are what hold the
+  # contract between generator_config.yml and the overlay — a disagreement there
+  # is otherwise a compile error two stages downstream, in generated code.
+  tooling:
+    name: Generator
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version-file: 'codegen/tooling/go.mod'
+          cache: true
+          cache-dependency-path: codegen/tooling/go.sum
+      - name: go vet
+        working-directory: codegen/tooling
+        env:
+          GOWORK: 'off'
+        run: go vet ./...
+      - name: go test
+        working-directory: codegen/tooling
+        env:
+          GOWORK: 'off'
+        run: go test ./...
+
+  # `make verify` is the whole pipeline plus a git diff: stage 3 (the overlay),
+  # 4a (the IR), 4a' (normalisation), 4b (schema and models), 4c (the HTTP
+  # client), 4d (the CRUD glue), then tfplugindocs. Any file it produces that is
+  # not already committed is a failure — the committed output is the reviewable
+  # artifact, and it is only reviewable if it is what the spec says.
+  regenerate:
+    name: Regenerate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: 'go.mod'
           cache: true
-      # We need the latest version of Terraform for our documentation generation to use
+      # Stage 3 applies the OpenAPI overlay with openapi-format. Node is in this
+      # repository for that and nothing else.
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: '22'
+          cache: npm
+      # tfplugindocs renders the documentation by asking a real Terraform CLI for
+      # the provider's schema.
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_wrapper: false
-      - run: make generate
-      - name: git diff
-        run: |
-          git diff --compact-summary --exit-code || \
-            (echo; echo "Unexpected difference in directories after code generation. Run 'make generate' command and commit."; exit 1)
+      - name: Cache the generator binaries
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: .tools/bin
+          key: tfplugingen-${{ runner.os }}-${{ hashFiles('GNUmakefile') }}
+      - run: make verify
 
   # Run acceptance tests in a matrix with Terraform CLI versions
   test:

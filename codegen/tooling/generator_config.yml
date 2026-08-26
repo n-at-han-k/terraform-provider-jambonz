@@ -1,0 +1,103 @@
+# Stage 4a. Which operations form one Terraform resource's CRUD lifecycle.
+#
+# The paths are the jambonz REST API's own; the operationIds they carry are
+# assigned in schemas/terraform.overlay.yaml, and cmd/gen looks each operation up
+# by that id. If these two files disagree, `make gen` fails and names both.
+provider:
+  name: jambonz
+
+resources:
+  account:
+    create:
+      path: /Accounts
+      method: POST
+    read:
+      path: /Accounts/{AccountSid}
+      method: GET
+    update:
+      path: /Accounts/{AccountSid}
+      method: PUT
+    delete:
+      path: /Accounts/{AccountSid}
+      method: DELETE
+
+  application:
+    create:
+      path: /Applications
+      method: POST
+    read:
+      path: /Applications/{ApplicationSid}
+      method: GET
+    update:
+      path: /Applications/{ApplicationSid}
+      method: PUT
+    delete:
+      path: /Applications/{ApplicationSid}
+      method: DELETE
+
+  phone_number:
+    create:
+      path: /PhoneNumbers
+      method: POST
+    read:
+      path: /PhoneNumbers/{PhoneNumberSid}
+      method: GET
+    update:
+      path: /PhoneNumbers/{PhoneNumberSid}
+      method: PUT
+    delete:
+      path: /PhoneNumbers/{PhoneNumberSid}
+      method: DELETE
+
+  voip_carrier:
+    create:
+      path: /VoipCarriers
+      method: POST
+    read:
+      path: /VoipCarriers/{VoipCarrierSid}
+      method: GET
+    update:
+      path: /VoipCarriers/{VoipCarrierSid}
+      method: PUT
+    delete:
+      path: /VoipCarriers/{VoipCarrierSid}
+      method: DELETE
+
+  sip_gateway:
+    create:
+      path: /SipGateways
+      method: POST
+    read:
+      path: /SipGateways/{SipGatewaySid}
+      method: GET
+    update:
+      path: /SipGateways/{SipGatewaySid}
+      method: PUT
+    delete:
+      path: /SipGateways/{SipGatewaySid}
+      method: DELETE
+
+# A data source is one read operation. The glue is generated from the same
+# binding the resource's is, so a lookup and a managed record cannot disagree
+# about how the record is decoded.
+data_sources:
+  account:
+    read:
+      path: /Accounts/{AccountSid}
+      method: GET
+  application:
+    read:
+      path: /Applications/{ApplicationSid}
+      method: GET
+  phone_number:
+    read:
+      path: /PhoneNumbers/{PhoneNumberSid}
+      method: GET
+  voip_carrier:
+    read:
+      path: /VoipCarriers/{VoipCarrierSid}
+      method: GET
+  sip_gateway:
+    read:
+      path: /SipGateways/{SipGatewaySid}
+      method: GET

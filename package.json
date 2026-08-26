@@ -1,0 +1,8 @@
+{
+  "name": "terraform-provider-jambonz-codegen",
+  "private": true,
+  "description": "Stage 3 of the codegen pipeline: applying codegen/tooling/schemas/terraform.overlay.yaml. Node is here for openapi-format and nothing else.",
+  "devDependencies": {
+    "openapi-format": "^1.29.1"
+  }
+}

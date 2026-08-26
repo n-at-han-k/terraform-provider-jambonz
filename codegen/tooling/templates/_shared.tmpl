@@ -1,0 +1,59 @@
+{{/* Fragments shared by the resource and data source templates. Parsed into
+     both template sets; neither renders on its own. */}}
+
+{{/* ---- request bodies ------------------------------------------------- */}}
+{{- define "body" }}
+{{- $verb := .Verb }}{{ $src := .Src }}
+{{- range .Attrs }}
+{{- if eq $verb "Create" }}{{ if not .InCreate }}{{ continue }}{{ end }}{{ else }}{{ if not .InUpdate }}{{ continue }}{{ end }}{{ end }}
+{{- if eq .Type "single_nested" }}
+{{ template "nestedSet" dict "Attr" . "Verb" $verb "Src" $src }}
+{{- else }}
+	{{ reqSet . $verb $src }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/* A nested object is assigned field by field. The oapi-codegen struct it lands
+     in is never named — `ensure` allocates through the pointer it is handed and
+     infers the type — so a property that is a $ref today and an inline schema
+     tomorrow changes nothing here. */}}
+{{- define "nestedSet" }}
+{{- $a := .Attr }}{{ $verb := .Verb }}{{ $src := .Src }}
+{{- $srcObj := printf "%s.%s" $src (pascal $a.Name) }}
+	if !{{ $srcObj }}.IsNull() && !{{ $srcObj }}.IsUnknown() {
+		{{ camel $a.Name }} := {{ nestedDst $a $verb }}
+{{- range $a.Nested }}
+{{- if eq $verb "Create" }}{{ if not .InCreate }}{{ continue }}{{ end }}{{ else }}{{ if not .InUpdate }}{{ continue }}{{ end }}{{ end }}
+		{{ reqSetField . $verb (printf "%s.%s" (camel $a.Name) (pascal .Name)) (printf "%s.%s" $srcObj (pascal .Name)) }}
+{{- end }}
+	}
+{{- end }}
+
+{{/* And read back the same way. The value type is tfplugingen-framework's, one
+     per attribute — CallHookValue, RegistrationHookValue — so it is named from
+     the attribute, and its attribute-type map is asked of the zero value rather
+     than rebuilt here. */}}
+{{- define "nestedGet" }}
+{{- $a := .Attr }}{{ $pkg := .Pkg }}
+	{{ if $a.ResponsePointer }}if p.{{ pascal $a.Name }} == nil {
+		data.{{ pascal $a.Name }} = {{ $pkg }}.New{{ pascal $a.Name }}ValueNull()
+	} else {{ end }}{
+		{{ camel $a.Name }}, d := {{ $pkg }}.New{{ pascal $a.Name }}Value(
+			data.{{ pascal $a.Name }}.AttributeTypes(ctx),
+			map[string]attr.Value{
+{{- range $a.Nested }}
+{{- if .InResponse }}
+				"{{ .Name }}": {{ respGetFrom . (printf "p.%s.%s" (pascal $a.Name) (pascal .Name)) }},
+{{- else }}
+				// {{ .Name }} is in a request body but not in the record; no read can
+				// populate it, so it is null rather than stale.
+				"{{ .Name }}": {{ nullValue . }},
+{{- end }}
+{{- end }}
+			},
+		)
+		diags.Append(d...)
+		data.{{ pascal $a.Name }} = {{ camel $a.Name }}
+	}
+{{- end }}

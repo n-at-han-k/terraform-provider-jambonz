@@ -1,6 +1,10 @@
-resource "jambonz_phone_number" "test_num" {
-  account_sid      = "85358b52-4264-4ec4-9d76-d5c5971b1ed5"
-  phone_number     = "45111111111"
-  voip_carrier_sid = "6cb36139-47bc-4a11-882d-80af726a022a"
-  application_sid  = "7e299ed5-53e5-4964-88d8-386a495b0c0c"
+resource "jambonz_phone_number" "main" {
+  number      = "15551234567"
+  account_sid = jambonz_account.acme.account_sid
+
+  # The carrier a number is provisioned from cannot be changed in place, so
+  # changing it replaces the number.
+  voip_carrier_sid = jambonz_voip_carrier.fastco.voip_carrier_sid
+
+  application_sid = jambonz_application.support_line.application_sid
 }
