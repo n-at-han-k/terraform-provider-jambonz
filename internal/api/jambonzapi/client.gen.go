@@ -1148,10 +1148,10 @@ type ServiceProvider struct {
 
 // SipGateway defines model for SipGateway.
 type SipGateway struct {
-	Inbound        *bool               `json:"inbound,omitempty"`
+	Inbound        *int                `json:"inbound,omitempty"`
 	Ipv4           string              `json:"ipv4"`
 	Netmask        float32             `json:"netmask"`
-	Outbound       *bool               `json:"outbound,omitempty"`
+	Outbound       *int                `json:"outbound,omitempty"`
 	Port           float32             `json:"port"`
 	SipGatewaySid  *openapi_types.UUID `json:"sip_gateway_sid,omitempty"`
 	VoipCarrierSid openapi_types.UUID  `json:"voip_carrier_sid"`
@@ -1399,10 +1399,10 @@ type VoipCarrier struct {
 	ApplicationSid      *openapi_types.UUID `json:"application_sid,omitempty"`
 	Description         *string             `json:"description,omitempty"`
 	Diversion           *string             `json:"diversion,omitempty"`
-	E164LeadingPlus     *bool               `json:"e164_leading_plus,omitempty"`
+	E164LeadingPlus     *int                `json:"e164_leading_plus,omitempty"`
 	InboundAuthPassword *string             `json:"inbound_auth_password,omitempty"`
 	InboundAuthUsername *string             `json:"inbound_auth_username,omitempty"`
-	IsActive            *bool               `json:"is_active,omitempty"`
+	IsActive            *int                `json:"is_active,omitempty"`
 	Name                string              `json:"name"`
 
 	// RegisterFromDomain optional domain to apply in the From header
@@ -1419,7 +1419,7 @@ type VoipCarrier struct {
 	// RegisterUseTls whether to REGISTER over TLS
 	RegisterUseTls   *bool               `json:"register_use_tls,omitempty"`
 	RegisterUsername *string             `json:"register_username,omitempty"`
-	RequiresRegister *bool               `json:"requires_register,omitempty"`
+	RequiresRegister *int                `json:"requires_register,omitempty"`
 	TechPrefix       *string             `json:"tech_prefix,omitempty"`
 	VoipCarrierSid   *openapi_types.UUID `json:"voip_carrier_sid,omitempty"`
 }
@@ -1893,13 +1893,13 @@ type ListSipGatewaysParams struct {
 
 // CreateSipGatewayJSONBody defines parameters for CreateSipGateway.
 type CreateSipGatewayJSONBody struct {
-	Inbound  *bool  `json:"inbound,omitempty"`
+	Inbound  *int   `json:"inbound,omitempty"`
 	Ipv4     string `json:"ipv4"`
-	IsActive *bool  `json:"is_active,omitempty"`
+	IsActive *int   `json:"is_active,omitempty"`
 
 	// Netmask CIDR prefix length for the gateway network
 	Netmask  *float32 `json:"netmask,omitempty"`
-	Outbound *bool    `json:"outbound,omitempty"`
+	Outbound *int     `json:"outbound,omitempty"`
 	Port     *float32 `json:"port,omitempty"`
 
 	// VoipCarrierSid voip carrier that provides this gateway
@@ -1968,14 +1968,14 @@ type CreateVoipCarrierJSONBody struct {
 	// E164LeadingPlus whether a leading + is required on INVITEs to this provider
 	//
 	// Example: true
-	E164LeadingPlus *bool `json:"e164_leading_plus,omitempty"`
+	E164LeadingPlus *int `json:"e164_leading_plus,omitempty"`
 
 	// InboundAuthPassword challenge inbound calls with this username/password if supplied
 	InboundAuthPassword *string `json:"inbound_auth_password,omitempty"`
 
 	// InboundAuthUsername challenge inbound calls with this username/password if supplied
 	InboundAuthUsername *string `json:"inbound_auth_username,omitempty"`
-	IsActive            *bool   `json:"is_active,omitempty"`
+	IsActive            *int    `json:"is_active,omitempty"`
 
 	// Name voip carrier name
 	//
@@ -1994,7 +1994,7 @@ type CreateVoipCarrierJSONBody struct {
 	RegisterPassword *string `json:"register_password,omitempty"`
 
 	// RegisterPublicIpInContact if true, use our public ip in Contact header; otherwise, use sip realm
-	RegisterPublicIpInContact *bool `json:"register_public_ip_in_contact,omitempty"`
+	RegisterPublicIpInContact *int `json:"register_public_ip_in_contact,omitempty"`
 
 	// RegisterSipRealm sip realm to authenticate with, if registration is required
 	//
@@ -2002,7 +2002,7 @@ type CreateVoipCarrierJSONBody struct {
 	RegisterSipRealm *string `json:"register_sip_realm,omitempty"`
 
 	// RegisterUseTls wehther this provider requires us to send a REGISTER use TLS protocol
-	RegisterUseTls *bool `json:"register_use_tls,omitempty"`
+	RegisterUseTls *int `json:"register_use_tls,omitempty"`
 
 	// RegisterUsername sip username to authenticate with, if registration is required
 	//
@@ -2010,7 +2010,7 @@ type CreateVoipCarrierJSONBody struct {
 	RegisterUsername *string `json:"register_username,omitempty"`
 
 	// RequiresRegister wehther this provider requires us to send a REGISTER to them in order to receive calls
-	RequiresRegister *bool `json:"requires_register,omitempty"`
+	RequiresRegister *int `json:"requires_register,omitempty"`
 
 	// TechPrefix prefix to be applied to the called number for outbound call attempts
 	TechPrefix *string `json:"tech_prefix,omitempty"`

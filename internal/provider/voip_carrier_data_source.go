@@ -101,10 +101,10 @@ func (d *voipCarrierDataSource) apply(ctx context.Context, data *datasource_voip
 	data.ApplicationSid = uuidPointerValue(p.ApplicationSid)
 	data.Description = types.StringPointerValue((*string)(p.Description))
 	data.Diversion = types.StringPointerValue((*string)(p.Diversion))
-	data.E164LeadingPlus = types.BoolPointerValue((*bool)(p.E164LeadingPlus))
+	data.E164LeadingPlus = int64PointerValue(p.E164LeadingPlus)
 	data.InboundAuthPassword = types.StringPointerValue((*string)(p.InboundAuthPassword))
 	data.InboundAuthUsername = types.StringPointerValue((*string)(p.InboundAuthUsername))
-	data.IsActive = types.BoolPointerValue((*bool)(p.IsActive))
+	data.IsActive = int64PointerValue(p.IsActive)
 	data.Name = types.StringValue(string(p.Name))
 	data.RegisterFromDomain = types.StringPointerValue((*string)(p.RegisterFromDomain))
 	data.RegisterFromUser = types.StringPointerValue((*string)(p.RegisterFromUser))
@@ -113,7 +113,7 @@ func (d *voipCarrierDataSource) apply(ctx context.Context, data *datasource_voip
 	data.RegisterSipRealm = types.StringPointerValue((*string)(p.RegisterSipRealm))
 	data.RegisterUseTls = types.BoolPointerValue((*bool)(p.RegisterUseTls))
 	data.RegisterUsername = types.StringPointerValue((*string)(p.RegisterUsername))
-	data.RequiresRegister = types.BoolPointerValue((*bool)(p.RequiresRegister))
+	data.RequiresRegister = int64PointerValue(p.RequiresRegister)
 	data.TechPrefix = types.StringPointerValue((*string)(p.TechPrefix))
 	_ = ctx
 	_ = diags

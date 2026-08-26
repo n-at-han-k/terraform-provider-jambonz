@@ -12,14 +12,14 @@ import (
 func SipGatewayResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"inbound": schema.BoolAttribute{
+			"inbound": schema.Int64Attribute{
 				Optional: true,
 				Computed: true,
 			},
 			"ipv4": schema.StringAttribute{
 				Required: true,
 			},
-			"is_active": schema.BoolAttribute{
+			"is_active": schema.Int64Attribute{
 				Optional: true,
 				Computed: true,
 			},
@@ -29,7 +29,7 @@ func SipGatewayResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "CIDR prefix length for the gateway network",
 				MarkdownDescription: "CIDR prefix length for the gateway network",
 			},
-			"outbound": schema.BoolAttribute{
+			"outbound": schema.Int64Attribute{
 				Optional: true,
 				Computed: true,
 			},
@@ -50,11 +50,11 @@ func SipGatewayResourceSchema(ctx context.Context) schema.Schema {
 }
 
 type SipGatewayModel struct {
-	Inbound        types.Bool   `tfsdk:"inbound"`
+	Inbound        types.Int64  `tfsdk:"inbound"`
 	Ipv4           types.String `tfsdk:"ipv4"`
-	IsActive       types.Bool   `tfsdk:"is_active"`
+	IsActive       types.Int64  `tfsdk:"is_active"`
 	Netmask        types.Number `tfsdk:"netmask"`
-	Outbound       types.Bool   `tfsdk:"outbound"`
+	Outbound       types.Int64  `tfsdk:"outbound"`
 	Port           types.Number `tfsdk:"port"`
 	SipGatewaySid  types.String `tfsdk:"sip_gateway_sid"`
 	VoipCarrierSid types.String `tfsdk:"voip_carrier_sid"`

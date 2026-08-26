@@ -79,11 +79,11 @@ func (r *sipGatewayResource) Create(ctx context.Context, req resource.CreateRequ
 	// as optional. Every property the overlay marked readOnly is not a property of
 	// this body at all, so server-owned values are never sent.
 	body := jambonzapi.CreateSipGatewayJSONRequestBody{}
-	setBoolPtr(&body.Inbound, data.Inbound)
+	setIntPtr(&body.Inbound, data.Inbound)
 	setString(&body.Ipv4, data.Ipv4)
-	setBoolPtr(&body.IsActive, data.IsActive)
+	setIntPtr(&body.IsActive, data.IsActive)
 	setFloatPtr(&body.Netmask, data.Netmask)
-	setBoolPtr(&body.Outbound, data.Outbound)
+	setIntPtr(&body.Outbound, data.Outbound)
 	setFloatPtr(&body.Port, data.Port)
 	setUUID(&body.VoipCarrierSid, data.VoipCarrierSid)
 
@@ -160,10 +160,10 @@ func (r *sipGatewayResource) Update(ctx context.Context, req resource.UpdateRequ
 	// overlay marks it readOnly, so it is not sent here, and this API rejects a
 	// body that carries it.
 	body := jambonzapi.UpdateSipGatewayJSONRequestBody{}
-	setBoolPtr(&body.Inbound, plan.Inbound)
+	setIntPtr(&body.Inbound, plan.Inbound)
 	setString(&body.Ipv4, plan.Ipv4)
 	setFloat(&body.Netmask, plan.Netmask)
-	setBoolPtr(&body.Outbound, plan.Outbound)
+	setIntPtr(&body.Outbound, plan.Outbound)
 	setFloat(&body.Port, plan.Port)
 	setUUID(&body.VoipCarrierSid, plan.VoipCarrierSid)
 
@@ -273,10 +273,10 @@ func (r *sipGatewayResource) apply(ctx context.Context, data *resource_sip_gatew
 	if p == nil {
 		return
 	}
-	data.Inbound = types.BoolPointerValue((*bool)(p.Inbound))
+	data.Inbound = int64PointerValue(p.Inbound)
 	data.Ipv4 = types.StringValue(string(p.Ipv4))
 	data.Netmask = floatValue(p.Netmask)
-	data.Outbound = types.BoolPointerValue((*bool)(p.Outbound))
+	data.Outbound = int64PointerValue(p.Outbound)
 	data.Port = floatValue(p.Port)
 	data.VoipCarrierSid = uuidValue(p.VoipCarrierSid)
 	data.SipGatewaySid = uuidPointerValue(p.SipGatewaySid)

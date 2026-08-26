@@ -258,7 +258,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed"
 						},
 						"name": "inbound"
@@ -276,7 +276,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed"
 						},
 						"name": "outbound"
@@ -331,7 +331,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed"
 						},
 						"name": "e164_leading_plus"
@@ -350,7 +350,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed"
 						},
 						"name": "is_active"
@@ -409,7 +409,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed"
 						},
 						"name": "requires_register"
@@ -720,7 +720,7 @@
 			"schema": {
 				"attributes": [
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed_optional"
 						},
 						"name": "inbound"
@@ -732,7 +732,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed_optional"
 						},
 						"name": "is_active"
@@ -745,7 +745,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed_optional"
 						},
 						"name": "outbound"
@@ -802,7 +802,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed_optional",
 							"description": "whether a leading + is required on INVITEs to this provider"
 						},
@@ -824,7 +824,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed_optional"
 						},
 						"name": "is_active"
@@ -859,7 +859,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed_optional",
 							"description": "if true, use our public ip in Contact header; otherwise, use sip realm"
 						},
@@ -873,7 +873,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed_optional",
 							"description": "wehther this provider requires us to send a REGISTER use TLS protocol"
 						},
@@ -887,7 +887,7 @@
 						}
 					},
 					{
-						"bool": {
+						"int64": {
 							"computed_optional_required": "computed_optional",
 							"description": "wehther this provider requires us to send a REGISTER to them in order to receive calls"
 						},

@@ -97,10 +97,10 @@ func (d *sipGatewayDataSource) apply(ctx context.Context, data *datasource_sip_g
 		return
 	}
 	data.SipGatewaySid = uuidPointerValue(p.SipGatewaySid)
-	data.Inbound = types.BoolPointerValue((*bool)(p.Inbound))
+	data.Inbound = int64PointerValue(p.Inbound)
 	data.Ipv4 = types.StringValue(string(p.Ipv4))
 	data.Netmask = floatValue(p.Netmask)
-	data.Outbound = types.BoolPointerValue((*bool)(p.Outbound))
+	data.Outbound = int64PointerValue(p.Outbound)
 	data.Port = floatValue(p.Port)
 	data.VoipCarrierSid = uuidValue(p.VoipCarrierSid)
 	_ = ctx

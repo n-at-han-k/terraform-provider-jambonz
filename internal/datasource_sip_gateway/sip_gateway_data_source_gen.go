@@ -12,7 +12,7 @@ import (
 func SipGatewayDataSourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"inbound": schema.BoolAttribute{
+			"inbound": schema.Int64Attribute{
 				Computed: true,
 			},
 			"ipv4": schema.StringAttribute{
@@ -21,7 +21,7 @@ func SipGatewayDataSourceSchema(ctx context.Context) schema.Schema {
 			"netmask": schema.NumberAttribute{
 				Computed: true,
 			},
-			"outbound": schema.BoolAttribute{
+			"outbound": schema.Int64Attribute{
 				Computed: true,
 			},
 			"port": schema.NumberAttribute{
@@ -38,10 +38,10 @@ func SipGatewayDataSourceSchema(ctx context.Context) schema.Schema {
 }
 
 type SipGatewayModel struct {
-	Inbound        types.Bool   `tfsdk:"inbound"`
+	Inbound        types.Int64  `tfsdk:"inbound"`
 	Ipv4           types.String `tfsdk:"ipv4"`
 	Netmask        types.Number `tfsdk:"netmask"`
-	Outbound       types.Bool   `tfsdk:"outbound"`
+	Outbound       types.Int64  `tfsdk:"outbound"`
 	Port           types.Number `tfsdk:"port"`
 	SipGatewaySid  types.String `tfsdk:"sip_gateway_sid"`
 	VoipCarrierSid types.String `tfsdk:"voip_carrier_sid"`

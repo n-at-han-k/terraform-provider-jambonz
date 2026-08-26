@@ -24,7 +24,7 @@ func VoipCarrierDataSourceSchema(ctx context.Context) schema.Schema {
 			"diversion": schema.StringAttribute{
 				Computed: true,
 			},
-			"e164_leading_plus": schema.BoolAttribute{
+			"e164_leading_plus": schema.Int64Attribute{
 				Computed: true,
 			},
 			"inbound_auth_password": schema.StringAttribute{
@@ -34,7 +34,7 @@ func VoipCarrierDataSourceSchema(ctx context.Context) schema.Schema {
 			"inbound_auth_username": schema.StringAttribute{
 				Computed: true,
 			},
-			"is_active": schema.BoolAttribute{
+			"is_active": schema.Int64Attribute{
 				Computed: true,
 			},
 			"name": schema.StringAttribute{
@@ -70,7 +70,7 @@ func VoipCarrierDataSourceSchema(ctx context.Context) schema.Schema {
 			"register_username": schema.StringAttribute{
 				Computed: true,
 			},
-			"requires_register": schema.BoolAttribute{
+			"requires_register": schema.Int64Attribute{
 				Computed: true,
 			},
 			"tech_prefix": schema.StringAttribute{
@@ -88,10 +88,10 @@ type VoipCarrierModel struct {
 	ApplicationSid            types.String `tfsdk:"application_sid"`
 	Description               types.String `tfsdk:"description"`
 	Diversion                 types.String `tfsdk:"diversion"`
-	E164LeadingPlus           types.Bool   `tfsdk:"e164_leading_plus"`
+	E164LeadingPlus           types.Int64  `tfsdk:"e164_leading_plus"`
 	InboundAuthPassword       types.String `tfsdk:"inbound_auth_password"`
 	InboundAuthUsername       types.String `tfsdk:"inbound_auth_username"`
-	IsActive                  types.Bool   `tfsdk:"is_active"`
+	IsActive                  types.Int64  `tfsdk:"is_active"`
 	Name                      types.String `tfsdk:"name"`
 	RegisterFromDomain        types.String `tfsdk:"register_from_domain"`
 	RegisterFromUser          types.String `tfsdk:"register_from_user"`
@@ -100,7 +100,7 @@ type VoipCarrierModel struct {
 	RegisterSipRealm          types.String `tfsdk:"register_sip_realm"`
 	RegisterUseTls            types.Bool   `tfsdk:"register_use_tls"`
 	RegisterUsername          types.String `tfsdk:"register_username"`
-	RequiresRegister          types.Bool   `tfsdk:"requires_register"`
+	RequiresRegister          types.Int64  `tfsdk:"requires_register"`
 	TechPrefix                types.String `tfsdk:"tech_prefix"`
 	VoipCarrierSid            types.String `tfsdk:"voip_carrier_sid"`
 }

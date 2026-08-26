@@ -165,7 +165,60 @@ actions:
     description: Fields the VoipCarrier record carries that the create body omitted
     update:
       is_active:
-        type: boolean
+        type: integer
+
+  # ---- booleans the API answers as numbers ---------------------------------
+  #
+  # Every one of these is a tinyint(1) column, and jambonz hands the row back
+  # with 0 or 1 rather than false or true. The spec says boolean, so the
+  # generated client unmarshals into a Go bool and the read fails:
+  #
+  #   json: cannot unmarshal number into Go struct field
+  #   VoipCarrier.e164_leading_plus of type bool
+  #
+  # Declaring them integer describes what the server actually sends. It costs
+  # the Terraform attribute its bool type -- these are 1/0 in a resource block,
+  # not true/false -- which is the honest trade: a bool that cannot survive a
+  # read is worse than a number that can.
+  - target: $.components.schemas.VoipCarrier.properties
+    description: tinyint(1) columns, answered as numbers
+    update:
+      e164_leading_plus:
+        type: integer
+      requires_register:
+        type: integer
+      is_active:
+        type: integer
+
+  - target: $.components.schemas.SipGateway.properties
+    description: tinyint(1) columns, answered as numbers
+    update:
+      inbound:
+        type: integer
+      outbound:
+        type: integer
+
+  - target: $.paths['/VoipCarriers'].post.requestBody.content['application/json'].schema.properties
+    description: The create body's copies of the same tinyint columns
+    update:
+      e164_leading_plus:
+        type: integer
+      requires_register:
+        type: integer
+      register_use_tls:
+        type: integer
+      register_public_ip_in_contact:
+        type: integer
+
+  - target: $.paths['/SipGateways'].post.requestBody.content['application/json'].schema.properties
+    description: The create body's copies of the same tinyint columns
+    update:
+      is_active:
+        type: integer
+      inbound:
+        type: integer
+      outbound:
+        type: integer
 
   # And the same gap the other way round: the create body takes app_json and the
   # Application record does not declare it, though the column exists and the API

@@ -30,7 +30,7 @@ func VoipCarrierResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Diversion header or phone number to apply to outbound calls",
 				MarkdownDescription: "Diversion header or phone number to apply to outbound calls",
 			},
-			"e164_leading_plus": schema.BoolAttribute{
+			"e164_leading_plus": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "whether a leading + is required on INVITEs to this provider",
@@ -49,7 +49,7 @@ func VoipCarrierResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "challenge inbound calls with this username/password if supplied",
 				MarkdownDescription: "challenge inbound calls with this username/password if supplied",
 			},
-			"is_active": schema.BoolAttribute{
+			"is_active": schema.Int64Attribute{
 				Optional: true,
 				Computed: true,
 			},
@@ -77,7 +77,7 @@ func VoipCarrierResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "sip password to authenticate with, if registration is required",
 				MarkdownDescription: "sip password to authenticate with, if registration is required",
 			},
-			"register_public_ip_in_contact": schema.BoolAttribute{
+			"register_public_ip_in_contact": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "if true, use our public ip in Contact header; otherwise, use sip realm",
@@ -89,7 +89,7 @@ func VoipCarrierResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "sip realm to authenticate with, if registration is required",
 				MarkdownDescription: "sip realm to authenticate with, if registration is required",
 			},
-			"register_use_tls": schema.BoolAttribute{
+			"register_use_tls": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "wehther this provider requires us to send a REGISTER use TLS protocol",
@@ -101,7 +101,7 @@ func VoipCarrierResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "sip username to authenticate with, if registration is required",
 				MarkdownDescription: "sip username to authenticate with, if registration is required",
 			},
-			"requires_register": schema.BoolAttribute{
+			"requires_register": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
 				Description:         "wehther this provider requires us to send a REGISTER to them in order to receive calls",
@@ -125,19 +125,19 @@ type VoipCarrierModel struct {
 	ApplicationSid            types.String `tfsdk:"application_sid"`
 	Description               types.String `tfsdk:"description"`
 	Diversion                 types.String `tfsdk:"diversion"`
-	E164LeadingPlus           types.Bool   `tfsdk:"e164_leading_plus"`
+	E164LeadingPlus           types.Int64  `tfsdk:"e164_leading_plus"`
 	InboundAuthPassword       types.String `tfsdk:"inbound_auth_password"`
 	InboundAuthUsername       types.String `tfsdk:"inbound_auth_username"`
-	IsActive                  types.Bool   `tfsdk:"is_active"`
+	IsActive                  types.Int64  `tfsdk:"is_active"`
 	Name                      types.String `tfsdk:"name"`
 	RegisterFromDomain        types.String `tfsdk:"register_from_domain"`
 	RegisterFromUser          types.String `tfsdk:"register_from_user"`
 	RegisterPassword          types.String `tfsdk:"register_password"`
-	RegisterPublicIpInContact types.Bool   `tfsdk:"register_public_ip_in_contact"`
+	RegisterPublicIpInContact types.Int64  `tfsdk:"register_public_ip_in_contact"`
 	RegisterSipRealm          types.String `tfsdk:"register_sip_realm"`
-	RegisterUseTls            types.Bool   `tfsdk:"register_use_tls"`
+	RegisterUseTls            types.Int64  `tfsdk:"register_use_tls"`
 	RegisterUsername          types.String `tfsdk:"register_username"`
-	RequiresRegister          types.Bool   `tfsdk:"requires_register"`
+	RequiresRegister          types.Int64  `tfsdk:"requires_register"`
 	TechPrefix                types.String `tfsdk:"tech_prefix"`
 	VoipCarrierSid            types.String `tfsdk:"voip_carrier_sid"`
 }
