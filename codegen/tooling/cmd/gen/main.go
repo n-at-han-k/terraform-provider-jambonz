@@ -220,8 +220,8 @@ func main() {
 	}
 
 	funcs := template.FuncMap{
-		"pascal":   pascal,
-		"camel":    camel,
+		"pascal":      pascal,
+		"camel":       camel,
 		"respGet":     respGet,
 		"respGetFrom": respGetFrom,
 		"reqSet":      reqSet,

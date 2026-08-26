@@ -13,11 +13,12 @@
 //   - "provider returned invalid result object after apply", which is Terraform
 //     rejecting a value the provider left unknown. No unit test sees it: the
 //     provider code is perfectly happy, and it is core that objects.
+//
 //   - an attribute that reads back differently from how it was written, which
 //     needs a server that actually stores it.
 //
-//	docker compose -f test/docker-compose.yml up -d --wait
-//	make testacc
+//     docker compose -f test/docker-compose.yml up -d --wait
+//     make testacc
 package provider
 
 import (
@@ -28,6 +29,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	fwresource "github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 
 	"terraform-provider-jambonz/internal/api/jambonzapi"
@@ -40,6 +42,15 @@ import (
 const (
 	testAccEndpoint = "http://127.0.0.1:3000/v1"
 	testAccAPIKey   = "38700987-c7a4-4685-a5bb-af378f9734de"
+
+	// The database, for jambonz_api_key. Published on 13306 by
+	// test/docker-compose.yml — see the comment there.
+	testAccDatabaseURL = "mysql://root:jambones@127.0.0.1:13306/jambones"
+
+	// Seeded by the api-server's own migration, and referred to by the
+	// fixtures in schemas/acceptance.json.
+	testAccAccountSid         = "9351f46a-678c-43f5-b8a6-d4eb58d131af"
+	testAccServiceProviderSid = "2708b1b3-2736-40ea-b502-c53d8396247f"
 )
 
 // testAccProviderFactories is how the test harness gets a provider without a
@@ -67,6 +78,9 @@ func testAccPreCheck(t *testing.T) {
 	// test.
 	t.Setenv("JAMBONZ_ENDPOINT", testAccEndpoint)
 	t.Setenv("JAMBONZ_API_KEY", testAccAPIKey)
+	// jambonz_api_key needs this one instead; the provider takes either or
+	// both, and a resource says at Configure time which it needed.
+	t.Setenv("JAMBONZ_DATABASE_URL", testAccDatabaseURL)
 
 	client, err := testAccAPIClient()
 	if err != nil {
@@ -97,4 +111,47 @@ func testAccAPIClient() (*jambonzapi.ClientWithResponses, error) {
 		return nil, fmt.Errorf("build api client: %w", err)
 	}
 	return client, nil
+}
+
+// TestAccCoverage is the reason api_key stopped being the untested one.
+//
+// cmd/gen already refuses to generate a resource that has no fixture in
+// schemas/acceptance.json, so nothing in the IR can go uncovered. api_key is
+// not in the IR — it is hand-written, because it mints the key the API
+// authenticates with — so that check could never see it, and it went untested
+// precisely because it was the exception.
+//
+// This is the check for the exceptions: the provider's own registry, compared
+// against the resources that have an acceptance test. Adding a resource of
+// either kind and no test fails here, in an ordinary `go test`, without needing
+// TF_ACC or a server.
+func TestAccCoverage(t *testing.T) {
+	// Every type name below is covered by a TestAcc* function in this package:
+	// the generated <name>_resource_test.go files, and api_key_resource_test.go
+	// by hand. Add the resource AND its test, then add it here.
+	covered := map[string]bool{
+		"jambonz_account":      true,
+		"jambonz_api_key":      true,
+		"jambonz_application":  true,
+		"jambonz_phone_number": true,
+		"jambonz_sip_gateway":  true,
+		"jambonz_voip_carrier": true,
+	}
+
+	ctx := t.Context()
+	p := New("test")()
+	for _, newResource := range p.Resources(ctx) {
+		var resp fwresource.MetadataResponse
+		newResource().Metadata(ctx, fwresource.MetadataRequest{ProviderTypeName: "jambonz"}, &resp)
+		if !covered[resp.TypeName] {
+			t.Errorf("%s is registered by the provider and has no acceptance test.\n"+
+				"Every resource gets one: generated from templates/resource_test.go.tmpl if it is in\n"+
+				"the IR, hand-written like api_key_resource_test.go if it is not. Then add it to\n"+
+				"`covered` here.", resp.TypeName)
+		}
+		delete(covered, resp.TypeName)
+	}
+	for name := range covered {
+		t.Errorf("%s is listed as covered but the provider does not register it", name)
+	}
 }

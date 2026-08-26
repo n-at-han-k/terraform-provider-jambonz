@@ -1,8 +1,8 @@
 # Terraform Provider testing workflow.
 #
 # Almost every Go file in internal/ is generated from codegen/openapi.yaml, so the
-# job that matters most here is `regenerate`: it runs the whole pipeline and fails
-# if the committed output and the spec disagree. Everything else — the build, the
+# job that matters most here is `regenerate`: it runs the whole pipeline and
+# reconciles the committed output with the spec. Everything else — the build, the
 # linters, the acceptance tests — is checking code that regeneration would replace.
 name: Tests
 
@@ -14,7 +14,8 @@ on:
     paths-ignore:
       - 'README.md'
 
-# Testing only needs permissions to read the repository contents.
+# Read, except in `regenerate`, which commits the pipeline's output back and
+# raises its own permissions to do it.
 permissions:
   contents: read
 
@@ -64,15 +65,35 @@ jobs:
           GOWORK: 'off'
         run: go test ./...
 
-  # `make verify` is the whole pipeline plus a git diff: stage 3 (the overlay),
-  # 4a (the IR), 4a' (normalisation), 4b (schema and models), 4c (the HTTP
-  # client), 4d (the CRUD glue), then tfplugindocs. Any file it produces that is
-  # not already committed is a failure — the committed output is the reviewable
-  # artifact, and it is only reviewable if it is what the spec says.
+  # The whole pipeline: stage 3 (the overlay), 4a (the IR), 4a' (normalisation),
+  # 4b (schema and models), 4c (the HTTP client), 4d (the CRUD glue), then
+  # tfplugindocs.
+  #
+  # On a push it REGENERATES AND COMMITS. The committed output is the reviewable
+  # artifact and it is only reviewable if it is what the spec says — but the
+  # docs in particular come out of a tool chain (a real Terraform CLI, answering
+  # a schema request) that not every contributor will have to hand, and a red
+  # build saying "you forgot to run make docs" is a chore the machine can simply
+  # do. So it does, and pushes the result.
+  #
+  # On a pull request it still just fails. A fork's token cannot push here, and
+  # a PR whose generated output disagrees with its spec is something a reviewer
+  # should see rather than have quietly repaired.
+  #
+  # No loop: GitHub does not start a new workflow run for a push made with the
+  # built-in GITHUB_TOKEN, so the commit this job makes does not re-trigger it.
   regenerate:
     name: Regenerate
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      # To push the regenerated output back.
+      contents: write
+    # Two pushes in quick succession would otherwise race to commit
+    # regenerations of different commits.
+    concurrency:
+      group: regenerate-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
@@ -95,7 +116,53 @@ jobs:
         with:
           path: .tools/bin
           key: tfplugingen-${{ runner.os }}-${{ hashFiles('GNUmakefile') }}
-      - run: make verify
+      # `make spec gen docs` is `make verify` without its final git diff: spec
+      # re-derives the IR from the overlay, gen renders, docs needs the
+      # Terraform CLI installed above.
+      - name: Regenerate
+        run: make spec gen docs
+
+      # Having just run the pipeline, the diff IS the question — so ask it
+      # directly, and get the changed paths for the summary rather than a bare
+      # exit code.
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Generated output already matches the spec." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "Regeneration changed:"
+              echo '```'
+              git status --porcelain
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # A pull request is told, not fixed: see the job comment above.
+      - name: Fail if a pull request is out of date
+        if: steps.changes.outputs.changed == 'true' && github.event_name == 'pull_request'
+        run: |
+          echo 'The committed output does not match the spec. Run `make gen docs` and commit the result.'
+          git --no-pager diff
+          exit 1
+
+      - name: Commit the regenerated output
+        if: steps.changes.outputs.changed == 'true' && github.event_name == 'push'
+        env:
+          SHA: ${{ github.sha }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Regenerate from the spec' \
+                     -m "The pipeline's output for ${SHA}, committed by the Regenerate job."
+          # HEAD:"$BRANCH" because actions/checkout leaves a detached HEAD on a
+          # push event, and a bare `git push` from one has no upstream to go to.
+          git push origin HEAD:"$BRANCH"
 
   # Run acceptance tests in a matrix with Terraform CLI versions.
   #

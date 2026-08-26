@@ -31,6 +31,12 @@ services:
     # is applied by the api-server's own migration job — which is entitled to
     # emit DDL that only its own MySQL accepts.
     image: mysql:5.7
+    ports:
+      # Published for jambonz_api_key, the one resource that talks to the
+      # database rather than the REST API — necessarily, since it mints the key
+      # every REST call authenticates with. 13306 rather than 3306 to stay clear
+      # of a MySQL the developer may already be running.
+      - "127.0.0.1:13306:3306"
     environment:
       # A real password, not MYSQL_ALLOW_EMPTY_PASSWORD: the migration job
       # asserts JAMBONES_MYSQL_PASSWORD is non-empty and exits before it

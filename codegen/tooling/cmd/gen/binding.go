@@ -95,15 +95,15 @@ type parameter struct {
 }
 
 type schemaObject struct {
-	Ref        string                  `json:"$ref"`
-	Type       string                  `json:"type"`
-	Format     string                  `json:"format"`
+	Ref    string `json:"$ref"`
+	Type   string `json:"type"`
+	Format string `json:"format"`
 	// Carried for the client manifest: an entity's `desc:` becomes a property
 	// description here, and that is the only documentation a generated row type can
 	// have. Dropping it would mean the field comments a device developer reads are the
 	// one thing NOT derived from the entity.
-	Description string                 `json:"description"`
-	ReadOnly   bool                    `json:"readOnly"`
+	Description string `json:"description"`
+	ReadOnly    bool   `json:"readOnly"`
 	// Immutable is `x-immutable`, the overlay's word for a property the API
 	// accepts on create and refuses on update:
 	//
@@ -120,7 +120,7 @@ type schemaObject struct {
 	// An immutable property is in the create body and not the update body,
 	// which is exactly Attribute.ForceNew — so saying this makes changing one
 	// replace the record, rather than plan as an update the API rejects.
-	Immutable  bool                    `json:"x-immutable"`
+	Immutable bool `json:"x-immutable"`
 	// AllOf carries the one composition this document uses: `nullable: true` beside
 	// an `allOf` of a single $ref, which is how OpenAPI 3.0 spells a nullable
 	// reference — a $ref may not have siblings, so the reference is wrapped.
