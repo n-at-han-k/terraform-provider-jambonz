@@ -12,9 +12,11 @@ import (
 )
 
 var (
-	// these will be set by the goreleaser configuration
-	// to appropriate values for the compiled binary.
-	version string = "dev"
+	// Overwritten by goreleaser on a tagged release; this is the value the
+	// image build uses, and it has to match the version the OpenTofu mirror
+	// publishes the binary under (JAMBONZ_PROVIDER_VERSION in kremlin's
+	// ns/crossplane-system/manifests/crossplane.rb). Bump both together.
+	version string = "1.5.0"
 
 	// goreleaser can pass other information to the main package, such as the specific commit
 	// https://goreleaser.com/cookbooks/using-main.version/
